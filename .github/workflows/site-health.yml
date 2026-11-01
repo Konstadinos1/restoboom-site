@@ -36,3 +36,5 @@ jobs:
         with:
           name: live-lighthouse
           path: .lighthouseci/
+          # The directory is dot-prefixed: upload-artifact@v4 skips hidden paths unless told otherwise.
+          include-hidden-files: true
