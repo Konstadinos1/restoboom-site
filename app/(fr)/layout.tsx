@@ -1,27 +1,21 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "../globals.css";
-import SiteHeader from "@/components/SiteHeader";
-import SiteFooter from "@/components/SiteFooter";
+import SiteShell from "@/components/SiteShell";
+import { assetPath, BRAND_NAME, SITE_URL } from "@/lib/site";
+import { HOME } from "@/lib/content";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://konstadinos1.github.io/restoboom-site"),
-  title: {
-    default: "RestoBoom — Le resto qui répond à tout.",
-    template: "%s — RestoBoom",
-  },
-  description:
-    "Appels manqués, textos, avis et relances pour restaurants du Québec. Une plateforme, en français d'abord, conforme LCAP et Loi 25, facturée en CAD.",
-  icons: { icon: "/favicon.svg" },
+  metadataBase: new URL(`${SITE_URL}/`),
+  applicationName: BRAND_NAME,
+  title: { default: HOME.fr.meta.title, template: `%s — ${BRAND_NAME}` },
+  description: HOME.fr.meta.description,
+  icons: { icon: [{ url: assetPath("/favicon.svg"), type: "image/svg+xml" }], apple: assetPath("/apple-touch-icon.png") },
+  manifest: assetPath("/manifest.webmanifest"),
+  formatDetection: { telephone: false },
 };
 
+export const viewport: Viewport = { themeColor: "#06080b", colorScheme: "dark" };
+
 export default function FrRootLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <html lang="fr">
-      <body>
-        <SiteHeader locale="fr" />
-        <main id="main">{children}</main>
-        <SiteFooter locale="fr" />
-      </body>
-    </html>
-  );
+  return <SiteShell locale="fr">{children}</SiteShell>;
 }

@@ -1,24 +1,25 @@
+import { ROUTE_PAIRS } from "./site";
+
 export type Locale = "fr" | "en";
 
-/** FR path -> EN counterpart. Root "/" handled separately. */
-const FR_TO_EN: Record<string, string> = {
-  "/": "/en/",
-  "/tarifs": "/en/pricing",
-  "/diagnostic": "/en/diagnostic",
-  "/confidentialite": "/en/privacy",
-  "/conditions": "/en/terms",
-};
-
-export function counterpartPath(frPath: string): string {
-  return FR_TO_EN[frPath] ?? "/en/";
+function stripTrailingSlash(path: string): string {
+  return path.length > 1 ? path.replace(/\/+$/, "") : path;
 }
 
-/** Build the opposite-locale href for the language toggle. */
-export function langSwitchHref(current: { locale: Locale; frPath: string }): string {
-  if (current.locale === "fr") return counterpartPath(current.frPath);
-  // EN -> FR: reverse lookup
-  const entry = Object.entries(FR_TO_EN).find(
-    ([, en]) => en.replace(/\/$/, "") === current.frPath.replace(/\/$/, "")
-  );
-  return entry ? entry[0] : "/";
+/** Opposite-locale path for the language toggle; unknown paths fall back to the other home page. */
+export function langSwitchHref(current: { locale: Locale; path: string }): string {
+  const needle = stripTrailingSlash(current.path || "/");
+  const pair = ROUTE_PAIRS.find((p) => stripTrailingSlash(p[current.locale]) === needle);
+  if (pair) return current.locale === "fr" ? pair.en : pair.fr;
+  return current.locale === "fr" ? "/en/" : "/";
+}
+
+/** Home page for a locale — in-page anchors must target the same-language home. */
+export function homeHref(locale: Locale): string {
+  return locale === "fr" ? "/" : "/en/";
+}
+
+/** Anchor on the locale's own home page (fixes EN nav previously jumping to the FR page). */
+export function homeAnchor(locale: Locale, anchor: string): string {
+  return `${homeHref(locale)}#${anchor}`;
 }

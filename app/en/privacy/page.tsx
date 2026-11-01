@@ -1,16 +1,19 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
+  locale: "en",
+  path: "/en/privacy/",
   title: "Privacy",
-  description: "How RestoBoom collects, uses and protects your data. Law 25.",
-  alternates: { canonical: "/en/privacy", languages: { fr: "/confidentialite" } },
-};
+  description:
+    "How RestoBoom collects, uses and protects your data. Law 25.",
+});
 
 const SECTIONS: { h: string; body: string }[] = [
   { h: "1. Who we are", body: "RestoBoom is operated by [PLACEHOLDER — legal entity], in Québec, Canada." },
   {
     h: "2. Data we collect",
-    body: "Through the diagnostic form: your name, your email, your restaurant's name and the address of your website or Google profile. Through the service: guest data you import or connect (guest profiles, conversations, reviews, consents). Minimal technical data (logs) for security and operation.",
+    body: "Through the diagnostic form: your name, your email, your restaurant's name, and — if you provide them — your phone, your number of locations and the address of your website or Google profile. We also record where the visit came from (campaign UTM parameters) and which page version you saw. Through the service: guest data you import or connect (guest profiles, conversations, reviews, consents). Minimal technical data (logs) for security and operation.",
   },
   {
     h: "3. Why",
@@ -34,7 +37,7 @@ const SECTIONS: { h: string; body: string }[] = [
   },
   {
     h: "8. Cookies",
-    body: "This marketing site uses no advertising trackers and sells no data.",
+    body: "This marketing site uses no cookies and no advertising trackers, and sells no data. Only with your consent, cookieless audience measurement counts visits and clicks without identifying you; you can change your mind anytime from the footer. Your browser's local storage keeps your choice and which page version you saw (A/B test).",
   },
   { h: "9. Changes", body: "Any change will be published here, with its date." },
   {
@@ -45,12 +48,12 @@ const SECTIONS: { h: string; body: string }[] = [
 
 export default function EnPrivacyPage() {
   return (
-    <section className="wrap max-w-3xl py-20 md:py-28" aria-labelledby="privacy-h1">
+    <section className="wrap max-w-3xl pb-20 pt-32 md:pb-28 md:pt-40" aria-labelledby="privacy-h1">
       <p className="kicker">Privacy</p>
       <h1 id="privacy-h1" className="display-lg mt-4">
         Your data stays your data.
       </h1>
-      <p className="mt-4 rounded border border-accent-deep bg-panel p-4 text-sm text-muted">
+      <p className="glass mt-6 p-4 text-sm text-muted">
         [TO BE REVIEWED BY A LAWYER BEFORE LAUNCH — plain-language draft.]
       </p>
       <div className="mt-12 space-y-10">

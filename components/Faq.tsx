@@ -2,21 +2,23 @@ import type { ReactNode } from "react";
 
 export type FaqItem = { q: string; a: ReactNode };
 
-export default function Faq({ items, label }: { items: FaqItem[]; label: string }) {
+export default function Faq({ items }: { items: readonly FaqItem[] }) {
   return (
-    <div className="divide-y divide-line border-y border-line" role="list">
+    <div className="divide-y divide-line border-y border-line">
       {items.map((item, i) => (
-        <details key={i} className="group py-4" role="listitem">
-          <summary className="cursor-pointer list-none text-lg font-semibold marker:hidden">
-            <span className="mr-2 font-mono text-sm text-accent" aria-hidden="true">
+        <details key={item.q} className="group py-2" data-reveal style={{ "--reveal-delay": i * 60 } as React.CSSProperties}>
+          <summary className="flex cursor-pointer list-none items-center gap-5 py-4 text-lg font-semibold md:text-xl">
+            <span className="font-mono text-xs text-accent" aria-hidden="true">
               {String(i + 1).padStart(2, "0")}
             </span>
-            {item.q}
+            <span className="flex-1">{item.q}</span>
+            <span className="faq-icon grid size-8 place-items-center rounded-full border border-line-strong font-mono text-lg text-frost" aria-hidden="true">
+              +
+            </span>
           </summary>
-          <div className="mt-3 pl-7 text-muted">{item.a}</div>
+          <div className="pb-5 pl-10 pr-12 text-muted">{item.a}</div>
         </details>
       ))}
-      <span className="sr-only">{label}</span>
     </div>
   );
 }

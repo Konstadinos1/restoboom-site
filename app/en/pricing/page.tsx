@@ -2,13 +2,15 @@ import Link from "next/link";
 import Faq, { type FaqItem } from "@/components/Faq";
 import PricingTable from "@/components/PricingTable";
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
+  locale: "en",
+  path: "/en/pricing/",
   title: "Pricing",
   description:
     "Three plans for Québec restaurants: Solo $149, Multi $449, Franchise $1,299 a month, in CAD. GST and QST extra.",
-  alternates: { canonical: "/en/pricing", languages: { fr: "/tarifs" } },
-};
+});
 
 const FAQ_ITEMS: FaqItem[] = [
   {
@@ -28,7 +30,7 @@ const FAQ_ITEMS: FaqItem[] = [
     a: (
       <>
         Billing is monthly. Cancellation terms are in the{" "}
-        <Link href="/en/terms" className="text-accent underline underline-offset-4">
+        <Link href="/en/terms/" className="text-frost underline underline-offset-4">
           Terms
         </Link>
         . <span className="text-muted">[PLACEHOLDER — cancellation policy to confirm]</span>
@@ -39,29 +41,29 @@ const FAQ_ITEMS: FaqItem[] = [
 
 export default function EnPricingPage() {
   return (
-    <section className="wrap py-20 md:py-28" aria-labelledby="pricing-h1">
+    <section className="wrap pb-20 pt-32 md:pb-28 md:pt-40" aria-labelledby="pricing-h1">
       <p className="kicker">Pricing</p>
       <h1 id="pricing-h1" className="display-lg mt-4">
         Three plans. In Canadian dollars.
       </h1>
-      <p className="mt-6 max-w-2xl text-lg text-muted">
+      <p className="lede mt-6 max-w-2xl">
         The plan follows your locations, not your feature list. Every function — front desk, reviews,
         follow-ups, regulars — is included everywhere.
       </p>
       <div className="mt-12">
-        <PricingTable locale="en" variant="full" />
+        <PricingTable locale="en" variant="full" headingLevel="h2" />
       </div>
 
-      <h2 className="display-lg mt-24">Pricing questions.</h2>
+      <h2 className="display-lg mt-28">Pricing questions.</h2>
       <div className="mt-10">
-        <Faq items={FAQ_ITEMS} label="Pricing questions" />
+        <Faq items={FAQ_ITEMS} />
       </div>
 
-      <div className="mt-20 rounded border border-line bg-panel p-8">
+      <div className="glass ticks mt-20 p-8 md:p-12">
         <h2 className="text-2xl font-bold">Not sure? Talk to a human.</h2>
         <Link
           href="/en/diagnostic"
-          className="mt-6 inline-block rounded bg-accent px-6 py-3 text-lg font-bold text-bg hover:bg-accent-deep hover:text-ink"
+          className="btn btn-primary mt-6" data-track="cta_click" data-track-label="pricing_bottom"
         >
           Free diagnostic
         </Link>
