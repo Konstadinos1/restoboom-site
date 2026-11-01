@@ -6,6 +6,9 @@ cd "$(dirname "$0")/.."
 
 npm run build
 
+# Next's export emits its own default 404.html; restore our French one.
+cp public/404.html out/404.html
+
 rm -rf .ghp
 cp -r out .ghp
 touch .ghp/.nojekyll
