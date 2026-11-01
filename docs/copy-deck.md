@@ -270,6 +270,16 @@ EN mirror: full translation included in build; same 10 sections, same placeholde
 - EN home description: Missed calls, texts, reviews and follow-ups for Québec restaurants. One platform, French first, CASL and Law 25 compliant, priced in CAD.
 - OG image: [PLACEHOLDER — generate 1200×630 og.jpg, wordmark + hero line, before launch]
 
+---
+
+# v2.1 CHANGES (2026-11-01 — redesign)
+- Hero H1 is now an A/B test (`?ab_hero=a|b`): **A** (control) « Le resto qui répond à tout. » / "The restaurant that answers everything." · **B** « Appel manqué ? Texto en 15 secondes. » / "Missed call? Texted back in 15 seconds." (claim: 15 s text-back).
+- Primary CTA → free diagnostic (lower friction than a demo): « Obtenir mon diagnostic gratuit » / "Get my free diagnostic".
+- New S2 visual: illustrative missed-call timeline 12:15:00 → 12:15:15 → 12:15:40, labelled « Scénario illustratif ».
+- Closer H2: « Votre prochain appel manqué devient une conversation. » (softened from « une commande » — we can't promise an order).
+- New FAQ items: number stays the same (from S4 step 1); guest's language (from module 01).
+- Diagnostic form adds optional phone (stored E.164, shown (514) 555-0123), number of locations, UTM + A/B attribution; privacy §2 and §8 updated accordingly (consent-gated cookieless analytics).
+
 # CLAIM REGISTER (every factual claim → source)
 | Claim | Source |
 |---|---|
@@ -286,6 +296,8 @@ EN mirror: full translation included in build; same 10 sections, same placeholde
 | TPS/TVQ extra, billed in CAD | SPEC.md §8 |
 | CSV import day one, POS-fed profiles | restoboom-site-copy.md Act 3.04 (from SPEC) |
 | Built and hosted in Canada | SPEC.md §8 + ADR 002 |
+| Your number stays the same | Copy deck S4 step 1 (from SPEC onboarding) |
+| Missed-call text in the guest's language | SPEC.md Module C |
 
 # PLACEHOLDERS TO RESOLVE BEFORE LAUNCH
 1. Legal entity (privacy + terms) — RestoBoom operator. NOTE: 6337902 Canada Inc. is the Bellepros entity; do NOT publish it for RestoBoom unless the user confirms it is the operator.
