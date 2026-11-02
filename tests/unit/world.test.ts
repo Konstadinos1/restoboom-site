@@ -6,6 +6,7 @@ import { BISTRO, BRICK, buildBistroLayout, inOpening, OPENINGS, WALL_HEIGHT } fr
 import { assemblyAmount, deconstructAmount, displacedPose, hoverOffset, type BrickRandom } from "@/lib/world/explode";
 import { cameraAt, frameForAspect, portraitLensShift, scrollCursor, sectionProgress, SETTLE, type StationCamera } from "@/lib/world/director";
 import { scrambleText } from "@/lib/world/scramble";
+import { stationLocal } from "@/lib/world/stations";
 
 describe("seeded randomness and noise", () => {
   it("is deterministic per seed and stays in [0, 1)", () => {
@@ -85,8 +86,12 @@ describe("dot-matrix wordmark", () => {
   });
 
   it("refuses characters it has no glyph for", () => {
-    expect(() => layoutDots("RESTO?")).toThrow(/no glyph/);
-    expect(supportedGlyphs()).toEqual(expect.arrayContaining(["R", "E", "S", "T", "O", "B", "M", "."]));
+    expect(() => layoutDots("RESTO!")).toThrow(/no glyph/);
+    expect(supportedGlyphs()).toEqual(expect.arrayContaining(["R", "E", "S", "T", "O", "B", "M", ".", "?", "1", "2", "3"]));
+    // The question mark's last dot is its full stop, alone on the bottom row (the FAQ scene lights it).
+    const { dots } = layoutDots("?");
+    expect(dots[dots.length - 1]).toEqual({ col: 2, row: 6, char: "?" });
+    expect(dots.filter((d) => d.row === 6)).toHaveLength(1);
   });
 
   it("draws every dot as one centred square in a single path", () => {
@@ -230,6 +235,14 @@ describe("scroll director", () => {
     expect(p.target.x).toBeCloseTo(0);
     expect(Math.hypot(p.pos.x - p.target.x, p.pos.z - p.target.z)).toBeGreaterThan(Math.hypot(f.pos.x - f.target.x, f.pos.z - f.target.z));
     expect(p.fov).toBeGreaterThan(f.fov);
+  });
+});
+
+describe("station scenes", () => {
+  it("hand each scene its own progress, full once passed and none before", () => {
+    expect(stationLocal(3, 3, 0.4)).toBe(0.4);
+    expect(stationLocal(2, 3, 0.4)).toBe(1);
+    expect(stationLocal(4, 3, 0.4)).toBe(0);
   });
 });
 

@@ -60,6 +60,13 @@ path). The home page's sections are camera "stations": scroll drives the camera,
 apart, fog and the prismatic dives between stations. The HUD reads the active station from
 `<html data-active-station>` and CSS variables, so React never re-renders per frame.
 
+Each section between the hero and the closer has its own scene in `lib/world/three/stations/`, all
+procedural (outlines in `lib/world/stationShapes.ts`): a clock frozen in ice ringing out at 12 h 15,
+an ice slab cracking along one glowing crack per pain point, four ice cubes with the platform modules
+frozen inside, numbered stepping stones, a vault with a maple-leaf door, chat bubbles, pricing pillars
+topped with 1, 3 and 7 tiny bistros, and a dot-matrix question mark. Each scene animates with its
+section's scroll progress; only the current station and its neighbours are drawn.
+
 Tiers (`lib/world/tiers.ts`): **high** (refractive ice, shadows, MSAA) on 8+ core desktops, **medium**
 on other desktops, **low** on phones and 4-core / 4 GB devices, **static** (a still fogged scene, all
 content intact) for `prefers-reduced-motion`, Save-Data, no WebGL2, and WebGL that would run in

@@ -19,6 +19,12 @@ export function stationAnchor(index: number): Vec3 {
   return { x: 0, y: VOID_Y, z: -STATION_SPACING * index };
 }
 
+/** Progress to hand a station's scene: its own while current, finished once passed, not started before. */
+export function stationLocal(index: number, current: number, local: number): number {
+  if (index === current) return local;
+  return index < current ? 1 : 0;
+}
+
 const v = (x: number, y: number, z: number): Vec3 => ({ x, y, z });
 const add = (a: Vec3, b: Vec3): Vec3 => ({ x: a.x + b.x, y: a.y + b.y, z: a.z + b.z });
 

@@ -13,7 +13,7 @@ import { createBistro, type Bistro } from "./bistro";
 import { createIceMaterial } from "./ice";
 import { addLights, createSky, createSnow, createTerrain } from "./environment";
 import { createPipeline, createRenderer, type Pipeline } from "./renderer";
-import { createStations, type Stations } from "./stations";
+import { createStationKit, createStations, type Stations } from "./stations/index";
 
 const INTRO_SECONDS = 2.8;
 const CAMERA_DAMPING = 4.5;
@@ -46,7 +46,7 @@ function buildScene(cfg: TierConfig, pmrem: PMREMGenerator, report: (f: number) 
   report(0.45);
   const ice = createIceMaterial(cfg);
   const bistro = createBistro(cfg, ice);
-  const stations = createStations(ice);
+  const stations = createStations(createStationKit(cfg, ice));
   const snow = createSnow(cfg.snowParticles);
   scene.add(bistro.group, bistro.lights, stations.group, snow);
   report(0.7);
@@ -83,7 +83,7 @@ function renderFrame(built: Built, pipe: Pipeline, rig: Rig, frame: CameraFrame,
   (built.scene.fog as FogExp2).density = rig.fog;
   built.bistro.group.visible = rig.pos.length() < BISTRO_VISIBLE_RANGE;
   built.bistro.update(times.intro, bistroDeconstruction(frame), times.now);
-  built.stations.update(times.now, frame.station);
+  built.stations.update(times.now, frame.station, frame.local, rig.pos);
   built.snow.material.uniforms.uTime.value = times.now;
   pipe.lens.uniforms.uTime.value = times.now;
   pipe.lens.uniforms.uPrism.value = rig.prism;

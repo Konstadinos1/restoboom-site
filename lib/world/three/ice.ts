@@ -44,6 +44,25 @@ export function createIceMaterial(cfg: TierConfig): MeshStandardMaterial {
   return withIceShading(new MeshStandardMaterial({ color: WORLD.iceTint, roughness: 0.18, metalness: 0.02, envMapIntensity: 0.8 }), SOLID_DEPTH_TINT);
 }
 
+const SHELL_OPACITY = 0.3;
+
+/** See-through ice that the station objects are frozen in: clearer than the bricks so the object reads. */
+export function createShellMaterial(cfg: TierConfig): MeshStandardMaterial {
+  if (cfg.transmission) {
+    return withIceShading(
+      new MeshPhysicalMaterial({
+        color: WORLD.iceClear, roughness: 0.12, metalness: 0, transmission: 0.95, thickness: 0.6, ior: 1.31,
+        attenuationColor: new Color(WORLD.iceAttenuation), attenuationDistance: 2.4, clearcoat: 0.5, clearcoatRoughness: 0.2, envMapIntensity: 0.6,
+      }),
+      REFRACTIVE_DEPTH_TINT,
+    );
+  }
+  const shell = new MeshStandardMaterial({ color: WORLD.iceTint, roughness: 0.15, metalness: 0.02, envMapIntensity: 0.9 });
+  // Without refraction, the only way to see what is frozen inside is plain transparency.
+  Object.assign(shell, { transparent: true, opacity: SHELL_OPACITY, depthWrite: false });
+  return withIceShading(shell, SOLID_DEPTH_TINT);
+}
+
 /** Natural variation between blocks: each one a little brighter, greyer or bluer, fixed per seed. */
 export function tintInstances(mesh: InstancedMesh, seed: number): void {
   const rng = createRng(seed);
