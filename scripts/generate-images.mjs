@@ -8,9 +8,11 @@ import { dirname, join } from "node:path";
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const font = (f) => readFileSync(join(root, "app/fonts", f)).toString("base64");
 const favicon = readFileSync(join(root, "public/favicon.svg"), "utf8");
+const plex = (weight) => `src:url(data:font/woff2;base64,${font(`ibm-plex-mono-latin-${weight}.woff2`)}) format("woff2");font-weight:${weight}`;
 const FONT_CSS = `
-@font-face{font-family:D;src:url(data:font/woff2;base64,${font("bricolage-grotesque-latin-wght.woff2")}) format("woff2");font-weight:200 800}
-@font-face{font-family:M;src:url(data:font/woff2;base64,${font("jetbrains-mono-latin-wght.woff2")}) format("woff2");font-weight:100 800}`;
+@font-face{font-family:D;${plex(600)}}
+@font-face{font-family:M;${plex(400)}}
+@font-face{font-family:M;${plex(600)}}`;
 
 const OG = {
   fr: { kicker: "POUR LES RESTAURANTS DU QUÉBEC", h: "Le resto qui répond à tout.", sub: "Appel manqué&nbsp;? Texto en 15 secondes.", meta: "HÉBERGÉ AU CANADA · LCAP + LOI 25 · CAD" },

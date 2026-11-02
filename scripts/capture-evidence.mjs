@@ -63,8 +63,8 @@ async function newDesktopPage(browser, { leadStatus = 201, consent = "denied", r
 
 async function shootHome(page) {
   for (const v of ["a", "b"]) {
-    await page.goto(`${BASE}?ab_hero=${v}`);
-    await page.waitForSelector("[data-testid=hero-canvas][data-ready=true]", { timeout: 15000 }).catch(() => issues.push(`WebGL hero not ready (variant ${v})`));
+    await page.goto(`${BASE}?ab_hero=${v}&3d=on`);
+    await page.waitForSelector("[data-testid=world][data-ready=true]", { timeout: 60000 }).catch(() => issues.push(`3D world not ready (variant ${v})`));
     await settle(page, 2500);
     await shoot(page, `d01-home-hero-variant-${v}`);
   }
@@ -253,8 +253,8 @@ async function beat(page, ms = 900) {
 }
 
 async function desktopHomeToLead(page) {
-  await page.goto(`${BASE}?ab_hero=b&utm_source=demo`);
-  await page.waitForSelector("[data-testid=hero-canvas][data-ready=true]", { timeout: 15000 }).catch(() => undefined);
+  await page.goto(`${BASE}?ab_hero=b&utm_source=demo&3d=on`);
+  await page.waitForSelector("[data-testid=world][data-ready=true]", { timeout: 60000 }).catch(() => undefined);
   for (const [x, y] of [[900, 300], [1100, 480], [800, 560], [1000, 330]]) {
     await page.mouse.move(x, y, { steps: 20 });
     await page.waitForTimeout(250);
