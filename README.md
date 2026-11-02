@@ -3,9 +3,10 @@
 Next.js 15 (App Router, static export) + Tailwind v4, deployed to GitHub Pages.
 French at `/`, English mirror at `/en/`. Live: https://konstadinos1.github.io/restoboom-site/
 
-Design language: **"Glace & braise"** — an igloo.inc-inspired cold, glassy, HUD-like UI
-(bracketed mono labels, frosted panels, scroll-revealed sections, a lazy WebGL hero) with
-RestoBoom's ember accent. All artwork and code are original.
+Design language: **"Glace & braise"** — an igloo.inc-inspired, scroll-driven 3D world: a bistro
+built from ice blocks with a warm orange glow inside, a foggy snowfield, HUD chrome in IBM Plex Mono
+(pixel wordmark, inverted labels, Montréal clock, progress bars). All artwork and code are original
+and procedural (no downloaded models, textures or sounds).
 
 Copy deck: `docs/copy-deck.md` (FR master, EN mirror, **claim register** — every factual claim
 must map to a source; no stats, no testimonials).
@@ -30,10 +31,11 @@ Plus generated `sitemap.xml` (hreflang fr-CA/en-CA/x-default), `robots.txt`, `ma
 | `npm run dev` | Dev server |
 | `npm run build` | Static export to `out/` (+ custom 404) |
 | `npm run serve` | Serve `out/` under `/restoboom-site/` with gzip, like Pages |
-| `npm test` / `npm run test:coverage` | Vitest unit tests (lib/: validation, i18n, A/B, analytics, SEO) |
+| `npm test` / `npm run test:coverage` | Vitest unit tests (lib/: validation, i18n, A/B, analytics, SEO, 3D world logic) |
 | `npm run build:e2e && npm run test:e2e` | Playwright E2E on desktop + mobile: flows, lead form, consent, axe a11y |
 | `npm run test:edge` | Supabase Edge Function: `deno check` + tests against a local fake of Supabase's REST API (needs Deno 2) |
 | `npm run lighthouse` | Lighthouse CI with budgets (perf ≥ 90, a11y 100, BP ≥ 95, SEO ≥ 95, LCP ≤ 2.5 s, CLS ≤ 0.05) |
+| `npm run lighthouse:world` | Same pages with the 3D world forced on (`?3d=on`): FCP ≤ 2 s, LCP ≤ 2.5 s, CLS ≤ 0.05, a11y 100 |
 | `npm run linkcheck` | Crawl the built site, fail on any broken internal link |
 | `npm run check` | Typecheck, unit, E2E, link check |
 | `node scripts/capture-evidence.mjs` | After `build:e2e`: screenshots of every screen/state (desktop + mobile) and MP4 videos of the main flows into `evidence/` (git-ignored) |
@@ -50,11 +52,23 @@ Plus generated `sitemap.xml` (hreflang fr-CA/en-CA/x-default), `robots.txt`, `ma
   budgets are checked against the live site.
 - **Dependabot**: weekly npm (grouped minor/patch), monthly Actions.
 
-## Hero 3D
+## 3D world
 
-`lib/scene/emberCrystal.ts` (three.js, dynamic import after idle — never on the critical path).
-Runs only with WebGL2, viewport ≥ 768 px, ≥ 4 CPU cores, no `prefers-reduced-motion`, no Save-Data
-(`lib/scene/capability.ts`); otherwise a CSS "ember in ice" gradient is shown. Pauses off-screen and in hidden tabs.
+`lib/world/` (pure, unit-tested logic: tiers, scroll director, brick layout and motion, dot-matrix sign)
+and `lib/world/three/` (three.js scene, loaded with a dynamic import after idle, never on the critical
+path). The home page's sections are camera "stations": scroll drives the camera, the bistro coming
+apart, fog and the prismatic dives between stations. The HUD reads the active station from
+`<html data-active-station>` and CSS variables, so React never re-renders per frame.
+
+Tiers (`lib/world/tiers.ts`): **high** (refractive ice, shadows, MSAA) on 8+ core desktops, **medium**
+on other desktops, **low** on phones and 4-core / 4 GB devices, **static** (a still fogged scene, all
+content intact) for `prefers-reduced-motion`, Save-Data, no WebGL2, and WebGL that would run in
+software (`failIfMajorPerformanceCaveat`: no usable GPU). `?3d=on` forces the world on software WebGL
+for QA, E2E tests and captures; it never overrides reduced motion or Save-Data.
+
+Lighthouse machines have no GPU, so `npm run lighthouse` scores the still fallback those visitors get;
+`npm run lighthouse:world` checks that the 3D never delays first paint or shifts layout. Frame-rate
+and main-thread cost of the 3D can only be judged on real devices with a GPU.
 
 ## Lead capture → Supabase
 
