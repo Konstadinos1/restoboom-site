@@ -58,28 +58,45 @@ test.describe("home page", () => {
     await ctx.close();
   });
 
-  test("WebGL hero mounts on desktop @desktop-only", async ({ page }) => {
-    // The capability gate needs >= 4 cores; pin it so the test doesn't depend on the CI runner size.
-    await page.addInitScript(() => Object.defineProperty(navigator, "hardwareConcurrency", { get: () => 8 }));
+  test("software WebGL (no GPU) keeps the still world @desktop-only", async ({ page }) => {
+    // The suite runs WebGL on SwiftShader, which reports a major performance caveat like a GPU-less machine.
     await page.goto("./");
-    await expect(page.getByTestId("hero-canvas")).toHaveAttribute("data-ready", "true", { timeout: 15_000 });
+    await expect(page.getByTestId("world")).toHaveAttribute("data-tier", "static");
+    await expect(page.locator("html")).toHaveAttribute("data-world", "static");
   });
 
-  test("reduced motion keeps the static hero (no WebGL)", async ({ browser }) => {
+  test("3D world mounts on desktop when forced with ?3d=on @desktop-only", async ({ page, captured }) => {
+    // Pin the tier signals so the test doesn't depend on the CI runner size (6 cores → medium tier).
+    await page.addInitScript(() => Object.defineProperty(navigator, "hardwareConcurrency", { get: () => 6 }));
+    await page.goto("./?3d=on");
+    const world = page.getByTestId("world");
+    await expect(world).toHaveAttribute("data-tier", "medium");
+    await expect(world).toHaveAttribute("data-ready", "true", { timeout: 45_000 });
+    await expect(page.locator("html")).toHaveAttribute("data-world", "ready");
+    await expect(page.getByTestId("world-canvas")).toHaveCSS("opacity", "1");
+    expect(captured.errors).toEqual([]);
+  });
+
+  test("reduced motion keeps the still world, even when 3D is forced", async ({ browser }) => {
     const ctx = await browser.newContext({ reducedMotion: "reduce", viewport: { width: 1440, height: 900 } });
     const page = await ctx.newPage();
-    await page.goto("http://localhost:4173/restoboom-site/");
+    await page.goto("http://localhost:4173/restoboom-site/?3d=on");
+    const world = page.getByTestId("world");
+    await expect(world).toHaveAttribute("data-tier", "static");
     await page.waitForTimeout(3500);
-    await expect(page.getByTestId("hero-canvas")).toHaveAttribute("data-ready", "false");
+    await expect(world).toHaveAttribute("data-ready", "false");
+    await expect(page.locator("html")).toHaveAttribute("data-world", "static");
     await ctx.close();
   });
 });
 
-test("mobile keeps the static hero fallback", async ({ page }, info) => {
+test("mobile gets the light 3D tier", async ({ page, captured }, info) => {
   test.skip(info.project.name !== "mobile");
-  await page.goto("./");
-  await page.waitForTimeout(3500);
-  await expect(page.getByTestId("hero-canvas")).toHaveAttribute("data-ready", "false");
+  await page.goto("./?3d=on");
+  const world = page.getByTestId("world");
+  await expect(world).toHaveAttribute("data-tier", "low");
+  await expect(world).toHaveAttribute("data-ready", "true", { timeout: 45_000 });
+  expect(captured.errors).toEqual([]);
 });
 
 test("unknown routes get the branded 404", async ({ page }) => {

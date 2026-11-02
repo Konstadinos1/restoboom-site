@@ -24,12 +24,13 @@ test("language toggle maps each page to its counterpart", async ({ page }) => {
   }
 });
 
-test("header turns to glass after scrolling @desktop-only", async ({ page }) => {
+test("HUD label follows the section on screen @desktop-only", async ({ page }) => {
   await page.goto("./");
-  const header = page.locator("header");
-  await expect(header).not.toHaveClass(/backdrop-blur/);
-  await page.mouse.wheel(0, 800);
-  await expect(header).toHaveClass(/backdrop-blur/);
+  const label = page.getByTestId("station-label");
+  await expect(label).toHaveText("////// 01 — Accueil");
+  await page.locator("#plateforme").evaluate((el) => window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY, behavior: "instant" }));
+  await expect(label).toHaveText("////// 04 — Plateforme");
+  await expect(page.locator("html")).toHaveAttribute("data-active-station", "platform");
 });
 
 test("mobile menu opens, navigates and closes with Escape", async ({ page }, info) => {
