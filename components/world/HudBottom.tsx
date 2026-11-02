@@ -42,8 +42,7 @@ export default function HudBottom({ locale }: { locale: Locale }) {
     <div className={`hud-bottom ${footerInView ? "is-hidden" : ""}`} aria-hidden="true" data-testid="hud-bottom">
       <div className="wrap hud-bottom-inner">
         <div className="flex flex-col gap-2">
-          {/* Phones scroll by habit, and there the hint would sit on the hero's second button. */}
-          <span className={`hud-hint hud-label hud-label--light hidden sm:inline-block ${moved ? "is-hidden" : ""}`}>{t.hint} ↓</span>
+          <span className={`hud-hint hud-label hud-label--light ${moved ? "is-hidden" : ""}`}>{t.hint} ↓</span>
           <div className="hud-progress"><span /></div>
         </div>
         <div className="hidden flex-col items-end gap-2 sm:flex">

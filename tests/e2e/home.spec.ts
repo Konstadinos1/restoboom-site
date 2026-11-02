@@ -101,6 +101,14 @@ test("bottom HUD stays pinned to the screen and steps aside for the footer @desk
   await expect(hud).toHaveClass(/is-hidden/);
 });
 
+test("phones skip the scroll hint so it never covers the hero buttons", async ({ page }, info) => {
+  test.skip(info.project.name !== "mobile");
+  await page.goto("./");
+  await expect(page.getByTestId("hud-bottom")).toBeVisible();
+  await expect(page.getByTestId("hud-bottom").getByText(/Défilez pour découvrir/)).toBeHidden();
+  await expect(page.locator("header").getByText("Fait au Québec")).toBeHidden();
+});
+
 test("mobile gets the light 3D tier", async ({ page, captured }, info) => {
   test.skip(info.project.name !== "mobile");
   await page.goto("./?3d=on");

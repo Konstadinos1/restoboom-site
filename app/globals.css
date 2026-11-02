@@ -405,6 +405,21 @@ body::after {
   opacity: 0;
 }
 
+/* Plain CSS rather than utility classes: .hud-label is unlayered and would beat Tailwind's layered
+   `hidden`. Phones scroll by habit, and there the hint would sit on the hero's second button; the
+   header's "Fait au Québec" tag would add a whole extra HUD row. */
+@media (max-width: 639px) {
+  .hud-hint,
+  .hud-label--from-sm {
+    display: none;
+  }
+}
+
+/* The still scene isn't being built: no build bar. */
+[data-world="static"] .world-build {
+  display: none;
+}
+
 /* ---------- Reveal on scroll (compositor-only) ---------- */
 .reveal-ready [data-reveal] {
   opacity: 0;

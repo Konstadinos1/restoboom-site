@@ -128,7 +128,7 @@ export default function SiteHeader({ locale }: { locale: Locale }) {
           </Link>
           <div className="flex flex-wrap gap-1">
             <StationLabel locale={locale} fallback={pageLabel} />
-            <span className="hud-label hud-label--light hidden sm:inline">{t.tagline}</span>
+            <span className="hud-label hud-label--light hud-label--from-sm">{t.tagline}</span>
           </div>
         </div>
         <div className="flex flex-col items-end gap-2">
