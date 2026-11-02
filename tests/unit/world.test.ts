@@ -91,6 +91,8 @@ describe("dot-matrix wordmark", () => {
 
   it("draws every dot as one centred square in a single path", () => {
     expect(dotsPath([{ col: 2, row: 3, char: "R" }], 0.82)).toBe("M2.09 3.09h0.82v0.82h-0.82z");
+    // Pinned to the cell's corner so a 3 px cell draws an exact 2 px dot.
+    expect(dotsPath([{ col: 2, row: 3, char: "R" }], 2 / 3, 0)).toBe("M2 3h0.67v0.67h-0.67z");
     expect(dotsPath([], 0.82)).toBe("");
     const { dots } = layoutDots("RESTOBOOM.");
     expect(dotsPath(dots, 0.82).match(/M/g)).toHaveLength(dots.length);

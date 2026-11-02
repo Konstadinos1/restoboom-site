@@ -124,7 +124,7 @@ export default function SiteHeader({ locale }: { locale: Locale }) {
       <div className="wrap flex items-start justify-between gap-4 pb-8 pt-4">
         <div className="flex flex-col items-start gap-2">
           <Link href={homeHref(locale)} className="block text-slate">
-            <PixelLogo className="h-[18px] w-auto md:h-[22px]" />
+            <PixelLogo className="h-[14px] w-auto md:h-[21px]" />
           </Link>
           <div className="flex flex-wrap gap-1">
             <StationLabel locale={locale} fallback={pageLabel} />

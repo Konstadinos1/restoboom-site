@@ -39,13 +39,14 @@ const PATH_DECIMALS = 100;
 const tidy = (n: number) => Math.round(n * PATH_DECIMALS) / PATH_DECIMALS;
 
 /**
- * One SVG path drawing every dot as a square of side `size` centred in its
- * cell: a single element instead of one <rect> per dot keeps the DOM small.
+ * One SVG path drawing every dot as a square of side `size`, `inset` from its
+ * cell's top-left corner (centred by default): a single element instead of
+ * one <rect> per dot keeps the DOM small.
  */
-export function dotsPath(dots: readonly Dot[], size: number): string {
-  const inset = tidy((1 - size) / 2);
+export function dotsPath(dots: readonly Dot[], size: number, inset = (1 - size) / 2): string {
   const side = tidy(size);
-  return dots.map((d) => `M${tidy(d.col + inset)} ${tidy(d.row + inset)}h${side}v${side}h-${side}z`).join("");
+  const offset = tidy(inset);
+  return dots.map((d) => `M${tidy(d.col + offset)} ${tidy(d.row + offset)}h${side}v${side}h-${side}z`).join("");
 }
 
 export function supportedGlyphs(): string[] {
