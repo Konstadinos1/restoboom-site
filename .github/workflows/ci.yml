@@ -49,9 +49,9 @@ jobs:
           retention-days: 7
 
   lighthouse:
-    name: Lighthouse budgets (perf ≥ 90, a11y 100, SEO ≥ 95)
+    name: Lighthouse budgets (perf ≥ 90, a11y 100, SEO ≥ 95) + 3D world load budget
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -62,11 +62,16 @@ jobs:
       - name: Production build
         run: npm run build
       - run: npm run lighthouse
+      # Lighthouse has no GPU, so the run above sees the still fallback; this one forces the 3D world on.
+      - name: 3D world load budget (?3d=on — LCP, CLS, a11y)
+        run: npm run lighthouse:world
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: lighthouse-reports
-          path: .lighthouseci/
+          path: |
+            .lighthouseci/
+            .lighthouseci-world/
           # The directory is dot-prefixed: upload-artifact@v4 skips hidden paths unless told otherwise.
           include-hidden-files: true
           retention-days: 14

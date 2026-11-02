@@ -12,6 +12,7 @@
     "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",
     "lighthouse": "lhci autorun --config=lighthouserc.cjs",
+    "lighthouse:world": "lhci autorun --config=lighthouserc.world.cjs",
     "linkcheck": "node scripts/check-links.mjs",
     "images": "node scripts/generate-images.mjs",
     "check": "npm run typecheck && npm run test && npm run build:e2e && npm run test:e2e && npm run linkcheck",
