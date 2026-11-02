@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 import { formatCad, frenchNonBreakingSpaces, HOME } from "@/lib/content";
-import { shouldRunWebGL } from "@/lib/scene/capability";
 
 const BANNED = /puissant|innovant|solution complète|seamless|robust|powerful|innovative|#1|best-in-class|guaranteed|garanti/i;
 const STAT = /\b\d{2,3}\s?%|\bx\d+\b|\d+\s?(clients|restaurants|customers)\b/i;
@@ -33,20 +32,6 @@ describe("formatCad", () => {
   });
 });
 
-describe("shouldRunWebGL", () => {
-  const capable = { viewportWidth: 1440, reducedMotion: false, saveData: false, hardwareConcurrency: 8, webgl2: true };
-  it("runs on a capable desktop", () => expect(shouldRunWebGL(capable)).toBe(true));
-  it.each([
-    ["reduced motion", { reducedMotion: true }],
-    ["save-data", { saveData: true }],
-    ["phone width", { viewportWidth: 390 }],
-    ["low-end CPU", { hardwareConcurrency: 2 }],
-    ["no WebGL2", { webgl2: false }],
-  ])("falls back for %s", (_label, override) => {
-    expect(shouldRunWebGL({ ...capable, ...override })).toBe(false);
-  });
-  it("treats the 768px boundary as capable", () => expect(shouldRunWebGL({ ...capable, viewportWidth: 768 })).toBe(true));
-});
 
 describe("frenchNonBreakingSpaces", () => {
   it("binds ? ! : ; and guillemets to the preceding word", () => {

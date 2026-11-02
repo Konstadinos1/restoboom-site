@@ -1,31 +1,32 @@
 @import "tailwindcss";
 
 /*
- * "Glace & braise" — cold, glassy, HUD-like surfaces (igloo-inspired motion and
- * typography discipline) with RestoBoom's ember accent as the only warm colour.
- * All text colours keep ≥ 4.5:1 contrast on --color-bg (WCAG AA).
+ * igloo-style world: pale fog, ice, small mono HUD labels — with RestoBoom's
+ * warm orange glow. Text colours keep ≥ 4.5:1 contrast on the fog and panels;
+ * the bright orange (--color-glow) is decorative only.
  */
 @theme {
-  --color-bg: #06080b;
-  --color-bg-2: #0b0f14;
-  --color-panel: rgb(18 24 31 / 0.62);
-  --color-panel-solid: #11171e;
-  --color-ink: #e9f0f5;
-  --color-frost: #bcd3e3;
-  --color-muted: #8d9aa6;
-  --color-accent: #ff5a36;
-  --color-accent-deep: #c73e1d;
-  --color-ember: #ffb38a;
-  --color-line: rgb(188 211 227 / 0.14);
-  --color-line-strong: rgb(188 211 227 / 0.28);
-  --font-sans: var(--font-display), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
-  --font-mono: var(--font-code), ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --color-bg: #e4e9ef;
+  --color-bg-2: #d8dee6;
+  --color-panel: rgb(244 246 249 / 0.88);
+  --color-panel-solid: #f4f6f9;
+  --color-ink: #1f2232;
+  --color-slate: #2c3045;
+  --color-frost: #39405a;
+  --color-muted: #4b5466;
+  --color-accent: #b5401b;
+  --color-accent-deep: #8f3014;
+  --color-ember: #a8391a;
+  --color-glow: #ff6a3d;
+  --color-line: rgb(31 34 50 / 0.16);
+  --color-line-strong: rgb(31 34 50 / 0.32);
+  --font-sans: var(--font-plex), ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --font-mono: var(--font-plex), ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 html {
-  scroll-behavior: smooth;
-  scroll-padding-top: 5rem;
+  scroll-padding-top: 6rem;
   background: var(--color-bg);
 }
 
@@ -33,93 +34,109 @@ body {
   background: var(--color-bg);
   color: var(--color-ink);
   font-family: var(--font-sans);
-  font-optical-sizing: auto;
+  font-size: 15px;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
 }
 
 ::selection {
-  background: var(--color-accent);
-  color: var(--color-bg);
+  background: var(--color-slate);
+  color: #fff;
 }
 
-/* Film grain over everything — the igloo "frosted lens" feel, ~1 KB, no image request. */
+/* Film grain over everything — the foggy lens. */
 body::after {
   content: "";
   position: fixed;
   inset: 0;
   z-index: 60;
   pointer-events: none;
-  opacity: 0.05;
+  opacity: 0.045;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
-/* Visible, high-contrast focus everywhere (WCAG 2.4.7) */
 :focus-visible {
   outline: 2px solid var(--color-accent);
   outline-offset: 3px;
-  border-radius: 4px;
+  border-radius: 2px;
 }
 
+/* ---------- Typography ---------- */
 .display-xl {
-  font-size: clamp(2.6rem, 7.6vw, 6.4rem);
-  line-height: 0.96;
-  letter-spacing: -0.045em;
-  font-weight: 650;
+  font-size: clamp(2.2rem, 5.2vw, 4.9rem);
+  line-height: 1;
+  letter-spacing: -0.055em;
+  font-weight: 500;
+  color: var(--color-slate);
   text-wrap: balance;
 }
 
 .display-lg {
-  font-size: clamp(2.1rem, 5.6vw, 4.4rem);
-  line-height: 1.02;
-  letter-spacing: -0.035em;
-  font-weight: 620;
+  font-size: clamp(1.75rem, 3.6vw, 3.2rem);
+  line-height: 1.04;
+  letter-spacing: -0.05em;
+  font-weight: 500;
+  color: var(--color-slate);
   text-wrap: balance;
 }
 
 .display-md {
-  font-size: clamp(1.5rem, 3vw, 2.25rem);
-  line-height: 1.12;
-  letter-spacing: -0.02em;
-  font-weight: 600;
+  font-size: clamp(1.15rem, 1.9vw, 1.55rem);
+  line-height: 1.2;
+  letter-spacing: -0.035em;
+  font-weight: 500;
+  color: var(--color-slate);
   text-wrap: balance;
 }
 
 .lede {
-  font-size: clamp(1.05rem, 1.6vw, 1.3rem);
+  font-size: clamp(0.98rem, 1.25vw, 1.1rem);
   color: var(--color-muted);
   text-wrap: pretty;
 }
 
-/* Bracketed HUD label: [ 01 ] LA PLATEFORME */
+/* "////// LABEL" kicker */
 .kicker {
-  font-family: var(--font-mono);
   font-size: 0.72rem;
   font-weight: 500;
-  letter-spacing: 0.2em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--color-frost);
-  display: inline-flex;
-  align-items: flex-start;
-  gap: 0.6em;
 }
 
 .kicker::before {
-  content: "";
-  flex-shrink: 0;
-  margin-top: 0.32em;
-  width: 0.5rem;
-  height: 0.5rem;
-  border-radius: 999px;
+  content: "////// ";
+  color: var(--color-accent);
+}
+
+/* ---------- HUD primitives ---------- */
+.hud-label {
+  display: inline-block;
+  padding: 0.2rem 0.45rem;
+  font-size: 0.66rem;
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  background: var(--color-slate);
+  color: #fff;
+}
+
+.hud-label--light {
+  background: rgb(255 255 255 / 0.92);
+  color: var(--color-slate);
+}
+
+.hud-label--accent {
   background: var(--color-accent);
-  box-shadow: 0 0 12px 2px rgb(255 90 54 / 0.55);
+  color: #fff;
 }
 
 .wrap {
-  max-width: 78rem;
+  max-width: 82rem;
   margin-inline: auto;
-  padding-inline: 1.25rem;
+  padding-inline: 1rem;
 }
 
 @media (min-width: 768px) {
@@ -130,106 +147,225 @@ body::after {
 
 .section {
   position: relative;
-  padding-block: clamp(5rem, 12vw, 10rem);
+  padding-block: clamp(4.5rem, 10vw, 8rem);
 }
 
-/* Frosted glass panel with HUD corner ticks */
+/* Panels over the 3D world: frosted-looking but without backdrop-filter (cheap to scroll over WebGL). */
 .glass {
   position: relative;
-  background: linear-gradient(180deg, rgb(26 34 44 / 0.66), rgb(12 16 21 / 0.5));
+  background: var(--color-panel);
   border: 1px solid var(--color-line);
-  border-radius: 1.1rem;
-  /* No backdrop-filter here: these panels sit on a flat background, so the blur was invisible
-     but re-computed on every scroll frame (jank on low-end GPUs). Overlays opt in explicitly. */
-  box-shadow: inset 0 1px 0 rgb(233 240 245 / 0.06), 0 30px 60px -40px rgb(0 0 0 / 0.8);
-  transition: border-color 0.4s var(--ease-out-expo), transform 0.6s var(--ease-out-expo);
-}
-
-.glass:hover {
-  border-color: var(--color-line-strong);
+  box-shadow: 0 18px 50px -30px rgb(31 34 50 / 0.45);
 }
 
 .ticks::before,
 .ticks::after {
   content: "";
   position: absolute;
-  width: 10px;
-  height: 10px;
-  border-color: var(--color-frost);
-  opacity: 0.55;
+  width: 9px;
+  height: 9px;
+  border-color: var(--color-slate);
   pointer-events: none;
 }
 
 .ticks::before {
   top: -1px;
   left: -1px;
-  border-top: 1px solid;
-  border-left: 1px solid;
-  border-top-left-radius: 4px;
+  border-top: 1.5px solid;
+  border-left: 1.5px solid;
 }
 
 .ticks::after {
   bottom: -1px;
   right: -1px;
-  border-bottom: 1px solid;
-  border-right: 1px solid;
-  border-bottom-right-radius: 4px;
+  border-bottom: 1.5px solid;
+  border-right: 1.5px solid;
 }
 
 .hairline {
   height: 1px;
-  background: linear-gradient(90deg, transparent, var(--color-line-strong), transparent);
+  background: var(--color-line-strong);
 }
 
-/* Buttons */
+/* ---------- Buttons ---------- */
 .btn {
   position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 0.65rem;
-  border-radius: 999px;
-  padding: 0.95rem 1.6rem;
-  font-weight: 600;
-  font-size: 1.02rem;
+  gap: 0.6rem;
+  padding: 0.85rem 1.3rem;
+  font-size: 0.82rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   line-height: 1.2;
-  transition: transform 0.5s var(--ease-out-expo), background-color 0.3s, color 0.3s, border-color 0.3s, box-shadow 0.5s;
-  will-change: transform;
+  transition: background-color 0.25s, color 0.25s, border-color 0.25s, transform 0.4s var(--ease-out-expo);
 }
 
 .btn-primary {
   background: var(--color-accent);
-  color: #0b0705;
-  box-shadow: 0 0 0 0 rgb(255 90 54 / 0), 0 12px 40px -12px rgb(255 90 54 / 0.65);
+  color: #fff;
+  box-shadow: 0 10px 34px -12px rgb(255 106 61 / 0.75);
 }
 
 .btn-primary:hover {
-  background: var(--color-ember);
-  box-shadow: 0 0 0 6px rgb(255 90 54 / 0.12), 0 18px 50px -12px rgb(255 90 54 / 0.8);
+  background: var(--color-accent-deep);
 }
 
 .btn-ghost {
-  border: 1px solid var(--color-line-strong);
-  color: var(--color-ink);
-  background: rgb(233 240 245 / 0.03);
+  border: 1px solid var(--color-slate);
+  color: var(--color-slate);
+  background: rgb(255 255 255 / 0.55);
 }
 
 .btn-ghost:hover {
-  border-color: var(--color-frost);
-  background: rgb(233 240 245 / 0.07);
+  background: var(--color-slate);
+  color: #fff;
 }
 
 .btn .arrow {
-  transition: transform 0.5s var(--ease-out-expo);
+  transition: transform 0.4s var(--ease-out-expo);
 }
 
 .btn:hover .arrow {
   transform: translateX(4px);
 }
 
-/* Scroll reveal — content is visible by default; JS opts in with .reveal-ready
-   so no-JS visitors and crawlers always see everything. */
-/* Opacity + transform only: both run on the compositor, so reveals stay smooth mid-scroll
-   even on weak GPUs (animating filter: blur() was dropping frames). */
+/* ---------- 3D world layer ---------- */
+.world {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.world-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transition: opacity 1.4s ease;
+}
+
+/* Before the 3D is ready, and for reduced motion / no WebGL: fog with a warm glow on the horizon. */
+.world-fallback {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(34% 26% at 62% 64%, rgb(255 140 90 / 0.55), transparent 70%),
+    radial-gradient(70% 50% at 50% 100%, rgb(245 248 251 / 0.9), transparent 70%),
+    linear-gradient(180deg, #e9eef4 0%, #c9d0da 55%, #dfe5ec 100%);
+}
+
+.world-content {
+  position: relative;
+  z-index: 1;
+}
+
+/* Stations: each home section gives the camera room to travel. overflow: clip (not hidden) keeps
+   sticky panels working while stopping decorative overhangs from causing sideways scroll. */
+.station {
+  position: relative;
+  min-height: var(--station-h, 165svh);
+  overflow-x: clip;
+}
+
+/* A patch of brighter fog behind the hero copy keeps it calm to read while ice flies past. */
+.hero-copy {
+  position: relative;
+  isolation: isolate;
+}
+
+.hero-copy::before {
+  content: "";
+  position: absolute;
+  inset: -16% -10% -14% -32%;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(closest-side, rgb(226 231 237 / 0.62), rgb(226 231 237 / 0.34) 60%, transparent);
+}
+
+.station-inner {
+  padding-block: 7rem 5rem;
+}
+
+.station-inner--sticky {
+  position: sticky;
+  top: 0;
+  min-height: 100svh;
+  display: flex;
+  align-items: center;
+}
+
+.station-panel {
+  width: min(100%, 34rem);
+}
+
+.station-inner--right .station-panel {
+  margin-left: auto;
+}
+
+@media (max-width: 767px) {
+  .station {
+    min-height: var(--station-h-mobile, 140svh);
+  }
+
+  .station-inner--sticky {
+    align-items: flex-end;
+  }
+}
+
+/* ---------- HUD chrome ---------- */
+.hud-top {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 40;
+  background: linear-gradient(180deg, rgb(228 233 239 / 0.96) 0%, rgb(228 233 239 / 0.82) 55%, rgb(228 233 239 / 0) 100%);
+}
+
+/* Short sticky panels fade as they leave the top so they never collide with the HUD (progressive
+   enhancement). Long panels (platform, pricing, FAQ) just scroll under the HUD's fog gradient. */
+@supports (animation-timeline: view()) {
+  @keyframes panel-exit {
+    to { opacity: 0; transform: translate3d(0, -24px, 0); }
+  }
+
+  .station-fade {
+    animation: panel-exit linear both;
+    animation-timeline: view();
+    animation-range: exit 0% exit 45%;
+  }
+}
+
+/* Dashed scroll/build progress bars, filled from CSS custom properties. */
+.hud-progress {
+  position: relative;
+  width: 9.5rem;
+  height: 6px;
+  background-image: repeating-linear-gradient(90deg, rgb(44 48 69 / 0.28) 0 6px, transparent 6px 9px);
+}
+
+.hud-progress > span {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: calc(var(--world-progress, 0) * 100%);
+  background-image: repeating-linear-gradient(90deg, var(--color-slate) 0 6px, transparent 6px 9px);
+}
+
+.hud-progress--build > span {
+  width: calc(var(--world-build, 0) * 100%);
+  background-image: repeating-linear-gradient(90deg, var(--color-accent) 0 6px, transparent 6px 9px);
+}
+
+.hud-hint {
+  transition: opacity 0.6s ease;
+}
+
+.hud-hint.is-hidden {
+  opacity: 0;
+}
+
+/* ---------- Reveal on scroll (compositor-only) ---------- */
 .reveal-ready [data-reveal] {
   opacity: 0;
   transform: translate3d(0, 22px, 0);
@@ -242,7 +378,6 @@ body::after {
   transform: none;
 }
 
-/* Hero entrance: transform only (opacity stays 1) so the LCP element paints immediately. */
 @keyframes hero-in {
   from { transform: translate3d(0, 22px, 0); }
   to { transform: none; }
@@ -265,31 +400,6 @@ html[data-ab-hero="b"] [data-ab-variant="b"] {
   display: inline;
 }
 
-/* Hero backdrop fallback (mobile / reduced motion / no WebGL): a CSS "ember in ice". */
-.hero-fallback {
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(38% 42% at 72% 46%, rgb(255 90 54 / 0.28), transparent 70%),
-    radial-gradient(30% 34% at 70% 44%, rgb(255 179 138 / 0.22), transparent 70%),
-    radial-gradient(60% 70% at 70% 50%, rgb(120 170 205 / 0.16), transparent 72%),
-    radial-gradient(120% 90% at 50% 120%, rgb(14 22 30 / 1), transparent 60%);
-}
-
-.hero-vignette {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background:
-    linear-gradient(180deg, rgb(6 8 11 / 0.2) 0%, transparent 30%, transparent 60%, var(--color-bg) 100%),
-    linear-gradient(90deg, rgb(6 8 11 / 0.85) 0%, rgb(6 8 11 / 0.35) 45%, transparent 70%);
-}
-
-/* Missed-call timeline */
-.timeline-dot {
-  box-shadow: 0 0 0 4px rgb(255 90 54 / 0.15), 0 0 18px rgb(255 90 54 / 0.6);
-}
-
 @keyframes ring {
   0%, 100% { transform: rotate(0); }
   10%, 30% { transform: rotate(-14deg); }
@@ -302,31 +412,8 @@ html[data-ab-hero="b"] [data-ab-variant="b"] {
   transform-origin: 50% 60%;
 }
 
-@keyframes pulse-dot {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.35; }
-}
-
-.live-dot {
-  animation: pulse-dot 1.8s ease-in-out infinite;
-}
-
-@keyframes scroll-cue {
-  0% { transform: translateY(-100%); }
-  100% { transform: translateY(200%); }
-}
-
-.scroll-cue::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, transparent, var(--color-frost), transparent);
-  animation: scroll-cue 2.2s var(--ease-out-expo) infinite;
-}
-
-/* Typing bubble for sample messages */
 .bubble {
-  border-radius: 1.1rem 1.1rem 1.1rem 0.3rem;
+  border-radius: 0.2rem 0.9rem 0.9rem 0.9rem;
 }
 
 details summary::-webkit-details-marker {
@@ -345,8 +432,8 @@ details[open] .faq-icon {
   position: absolute;
   left: -9999px;
   top: 0;
-  background: var(--color-accent);
-  color: var(--color-bg);
+  background: var(--color-slate);
+  color: #fff;
   padding: 0.5rem 1rem;
   font-weight: 600;
   z-index: 70;
@@ -357,7 +444,6 @@ details[open] .faq-icon {
   top: 0.5rem;
 }
 
-/* Honeypot: visually hidden but present for bots */
 .hp-field {
   position: absolute;
   left: -9999px;
@@ -366,10 +452,9 @@ details[open] .faq-icon {
   overflow: hidden;
 }
 
-/* Long-form legal pages */
 .prose-legal h2 {
-  font-size: 1.15rem;
-  font-weight: 650;
+  font-size: 1.05rem;
+  font-weight: 600;
   margin-top: 2.5rem;
 }
 
@@ -379,10 +464,6 @@ details[open] .faq-icon {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
-
   *,
   *::before,
   *::after {
