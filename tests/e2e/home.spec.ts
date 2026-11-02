@@ -90,6 +90,17 @@ test.describe("home page", () => {
   });
 });
 
+test("bottom HUD stays pinned to the screen and steps aside for the footer @desktop-only", async ({ page }) => {
+  await page.goto("./");
+  const hud = page.getByTestId("hud-bottom");
+  const box = await hud.boundingBox();
+  const viewport = page.viewportSize()!;
+  expect(Math.abs(box!.y + box!.height - viewport.height)).toBeLessThanOrEqual(1);
+  await expect(hud).not.toHaveClass(/is-hidden/);
+  await page.evaluate(() => window.scrollTo({ top: document.documentElement.scrollHeight, behavior: "instant" }));
+  await expect(hud).toHaveClass(/is-hidden/);
+});
+
 test("mobile gets the light 3D tier", async ({ page, captured }, info) => {
   test.skip(info.project.name !== "mobile");
   await page.goto("./?3d=on");
