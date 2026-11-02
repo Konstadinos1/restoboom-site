@@ -30,6 +30,7 @@ const TOTAL_HEIGHT = PARAPET_TOP;
 const OPEN_DRIFT: Vec3 = { x: 0.9, y: 0, z: -0.7 };
 const TINT_SEED = 17;
 const AT_REST = 0.001;
+const ROOM_SHOWS_AT = 0.04;
 
 const m4 = new Matrix4();
 const quat = new Quaternion();
@@ -214,7 +215,10 @@ type Details = {
 /** Flickering warm light; awning, sign and mullions lifting away; the room shrinking into a glowing heart. */
 function animateDetails(d: Details, roomGlow: Color, { intro, decon, time }: BrickMotion): void {
   const flicker = 0.9 + 0.06 * Math.sin(time * 1.7) + 0.04 * Math.sin(time * 4.3);
-  d.interior.room.material.color.copy(roomGlow).multiplyScalar(flicker * smooth(0.05, 0.6, intro));
+  const lit = smooth(0.05, 0.6, intro);
+  d.interior.room.material.color.copy(roomGlow).multiplyScalar(flicker * lit);
+  // Unlit, the room is just a dark box in the fog: show it only once it starts to glow.
+  d.interior.room.visible = lit > ROOM_SHOWS_AT;
   const lightLevel = INTERIOR_LIGHT.intensity * flicker * smooth(0.1, 0.7, intro) * (1 - decon * 0.6);
   d.interior.lights.forEach((l) => (l.intensity = lightLevel));
   const open = smooth(0.15, 0.65, decon);
