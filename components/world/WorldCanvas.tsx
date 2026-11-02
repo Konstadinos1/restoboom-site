@@ -58,6 +58,29 @@ const teardown = (m: Mounted) => {
   m.lenis?.destroy();
 };
 
+type MountCallbacks = { onReady: () => void; onFail: () => void };
+
+/** Mounts the world once the browser is idle; returns the cleanup. Any failure keeps the still fallback. */
+function mountWhenIdle(canvasRef: RefObject<HTMLCanvasElement | null>, tier: Exclude<Tier, "static">, cb: MountCallbacks): () => void {
+  let disposed = false;
+  let mounted: Mounted | null = null;
+  const cancelIdle = whenIdle(() => {
+    if (!canvasRef.current) return;
+    startWorld(canvasRef.current, tier, cb.onReady)
+      .then((m) => (disposed ? teardown(m) : (mounted = m)))
+      .catch((err) => {
+        console.warn("[world] 3D unavailable, keeping the still fallback", err);
+        publishBuild(1, "static");
+        cb.onFail();
+      });
+  });
+  return () => {
+    disposed = true;
+    cancelIdle();
+    if (mounted) teardown(mounted);
+  };
+}
+
 /** Picks the tier, mounts the world when the browser is idle and tears it down on unmount. */
 function useWorld(canvasRef: RefObject<HTMLCanvasElement | null>): { tier: Tier | "pending"; ready: boolean } {
   const [tier, setTier] = useState<Tier | "pending">("pending");
@@ -74,28 +97,18 @@ function useWorld(canvasRef: RefObject<HTMLCanvasElement | null>): { tier: Tier 
       };
     }
     publishBuild(0.05, "building");
-    let disposed = false;
-    let mounted: Mounted | null = null;
-    const onReady = () => {
-      stopTracking();
-      stopTracking = () => undefined;
-      setReady(true);
-    };
-    const cancelIdle = whenIdle(() => {
-      if (!canvasRef.current) return;
-      startWorld(canvasRef.current, chosen, onReady)
-        .then((m) => (disposed ? teardown(m) : (mounted = m)))
-        .catch((err) => {
-          console.warn("[world] 3D unavailable, keeping the still fallback", err);
-          publishBuild(1, "static");
-          setTier("static");
-        });
+    const unmount = mountWhenIdle(canvasRef, chosen, {
+      onReady: () => {
+        // The world's loop publishes the station from now on.
+        stopTracking();
+        stopTracking = () => undefined;
+        setReady(true);
+      },
+      onFail: () => setTier("static"),
     });
     return () => {
-      disposed = true;
-      cancelIdle();
+      unmount();
       stopTracking();
-      if (mounted) teardown(mounted);
       resetStation();
     };
   }, [canvasRef]);
