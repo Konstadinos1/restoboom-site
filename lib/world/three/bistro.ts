@@ -213,6 +213,7 @@ function animateDetails(d: Details, roomGlow: Color, { intro, decon, time }: Bri
   d.interior.lights.forEach((l) => (l.intensity = lightLevel));
   const open = smooth(0.15, 0.65, decon);
   d.interior.room.scale.setScalar(Math.max(AT_REST, 1 - open));
+  d.interior.furniture.scale.setScalar(Math.max(AT_REST, 1 - open));
   d.interior.heart.scale.setScalar(Math.max(AT_REST, open * (1.6 + 0.15 * Math.sin(time * 2.1))));
   d.interior.heart.rotation.set(time * 0.21, time * 0.33, 0);
   const appear = smooth(0.62, 1, intro);

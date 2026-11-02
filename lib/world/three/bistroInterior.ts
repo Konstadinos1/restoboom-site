@@ -20,6 +20,7 @@ const WALL_SHADE_BOTTOM = 1.25;
 const WALL_SHADE_FADE = 0.7;
 const LAMP_BOOST = 1.4;
 const HEART_RADIUS = 0.42;
+const TABLE_XS = [-1.85, 1.05] as const;
 const HEART_DETAIL = 1;
 export const INTERIOR_LIGHT = { intensity: 9, range: 7, decay: 2 } as const;
 
@@ -27,8 +28,12 @@ export type Interior = {
   group: Group;
   room: Mesh<BoxGeometry, MeshBasicMaterial>;
   heart: Mesh<BufferGeometry, ShaderMaterial>;
+  /** Counter, tables and chairs, pivoting on the heart so they can collapse into it. */
+  furniture: Group;
   lights: PointLight[];
 };
+
+const HEART_POSITION = { x: 0, y: WALL_HEIGHT * 0.55, z: 0 } as const;
 
 const glowing = (hex: string, intensity: number) => new MeshBasicMaterial({ color: new Color(hex).multiplyScalar(intensity), toneMapped: false });
 
@@ -82,27 +87,44 @@ function createHeart(): Mesh<BufferGeometry, ShaderMaterial> {
     fragmentShader: HEART_FRAGMENT,
   });
   const heart = new Mesh(geo, material);
-  heart.position.set(0, WALL_HEIGHT * 0.55, 0);
+  heart.position.set(HEART_POSITION.x, HEART_POSITION.y, HEART_POSITION.z);
   return heart;
 }
 
-/** Dark silhouettes against the warm light: a counter, two bistro tables with chairs and pendant lamps. */
+/**
+ * Dark silhouettes against the warm light: a counter and two bistro tables with chairs. The group's
+ * origin sits on the heart, so scaling it down draws the furniture into the heart as the walls open.
+ */
 function createFurniture(): Group {
   const group = new Group();
+  group.position.set(HEART_POSITION.x, HEART_POSITION.y, HEART_POSITION.z);
   const dark = new MeshStandardMaterial({ color: WORLD.furniture, roughness: 0.8 });
-  const lamp = glowing(WORLD.emberHot, GLOW_INTENSITY * LAMP_BOOST);
   const front = BISTRO.depth / 2 - BRICK.depth - 0.45;
   const add = (mesh: Mesh, x: number, y: number, z: number) => {
-    mesh.position.set(x, y, z);
+    mesh.position.set(x - HEART_POSITION.x, y - HEART_POSITION.y, z - HEART_POSITION.z);
     group.add(mesh);
   };
   add(new Mesh(new BoxGeometry(1.9, 1.0, 0.45), dark), -1.05, 0.5, front - 0.55);
-  for (const x of [-1.85, 1.05]) {
+  for (const x of TABLE_XS) {
     add(new Mesh(new CylinderGeometry(0.32, 0.32, 0.05, 20), dark), x, 0.74, front);
     add(new Mesh(new CylinderGeometry(0.04, 0.06, 0.72, 8), dark), x, 0.36, front);
     add(new Mesh(new BoxGeometry(0.34, 0.85, 0.06), dark), x - 0.48, 0.43, front + 0.05);
-    add(new Mesh(new SphereGeometry(0.11, 16, 12), lamp), x, 2.05, front);
-    add(new Mesh(new CylinderGeometry(0.006, 0.006, 0.8, 4), dark), x, 2.5, front);
+  }
+  return group;
+}
+
+/** Pendant lamps over the tables: they stay hanging in the air when everything else comes apart. */
+function createLamps(): Group {
+  const group = new Group();
+  const lamp = glowing(WORLD.emberHot, GLOW_INTENSITY * LAMP_BOOST);
+  const cord = new MeshStandardMaterial({ color: WORLD.furniture, roughness: 0.8 });
+  const front = BISTRO.depth / 2 - BRICK.depth - 0.45;
+  for (const x of TABLE_XS) {
+    const bulb = new Mesh(new SphereGeometry(0.11, 16, 12), lamp);
+    bulb.position.set(x, 2.05, front);
+    const wire = new Mesh(new CylinderGeometry(0.006, 0.006, 0.8, 4), cord);
+    wire.position.set(x, 2.5, front);
+    group.add(bulb, wire);
   }
   return group;
 }
@@ -120,7 +142,8 @@ export function createInterior(): Interior {
   const group = new Group();
   const room = createRoom();
   const heart = createHeart();
+  const furniture = createFurniture();
   const lights = createLights();
-  group.add(room, heart, createFurniture(), ...lights);
-  return { group, room, heart, lights };
+  group.add(room, heart, furniture, createLamps(), ...lights);
+  return { group, room, heart, furniture, lights };
 }
