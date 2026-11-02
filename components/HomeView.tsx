@@ -28,14 +28,17 @@ type StationProps = {
   side?: "left" | "right";
   sticky?: boolean;
   height?: string;
+  /** Extra class on the inner wrapper, for a station that lays out differently (the hero on phones). */
+  innerClassName?: string;
 };
 
 /** A home section the 3D camera travels through; its HUD panel stays put (sticky) while the camera moves. */
-function Station({ id, labelledBy, children, anchor, side = "left", sticky = true, height }: StationProps) {
+function Station({ id, labelledBy, children, anchor, side = "left", sticky = true, height, innerClassName = "" }: StationProps) {
   const style = height ? ({ "--station-h": height } as CSSProperties) : undefined;
+  const inner = ["wrap", "station-inner", `station-inner--${side}`, sticky ? "station-inner--sticky" : "", innerClassName].filter(Boolean).join(" ");
   return (
     <section id={anchor} data-station={id} aria-labelledby={labelledBy} className="station scroll-mt-0" style={style}>
-      <div className={`wrap station-inner station-inner--${side} ${sticky ? "station-inner--sticky" : ""}`}>{children}</div>
+      <div className={inner}>{children}</div>
     </section>
   );
 }
@@ -43,7 +46,7 @@ function Station({ id, labelledBy, children, anchor, side = "left", sticky = tru
 function Hero({ locale }: { locale: Locale }) {
   const t = HOME[locale].hero;
   return (
-    <Station id="hero" labelledBy="hero-h1" height="210svh">
+    <Station id="hero" labelledBy="hero-h1" height="210svh" innerClassName="station-inner--hero">
       <div className="station-fade hero-copy self-end pb-24 md:pb-20" style={{ width: "min(100%, 42rem)" }}>
         <p className="kicker hero-in" style={heroIn(0)}>{t.kicker}</p>
         <h1 id="hero-h1" className="display-xl hero-in mt-5" style={heroIn(1)}>

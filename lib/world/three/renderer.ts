@@ -4,6 +4,7 @@ import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
 import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
 import { ShaderPass } from "three/examples/jsm/postprocessing/ShaderPass.js";
 import { OutputPass } from "three/examples/jsm/postprocessing/OutputPass.js";
+import { portraitLensShift } from "../director";
 import type { TierConfig } from "../tiers";
 import { LensShader } from "./post";
 
@@ -53,6 +54,8 @@ export function createPipeline(renderer: WebGLRenderer, scene: Scene, camera: Pe
     composer.setSize(width, height);
     lens.uniforms.uResolution.value = new Vector2(width * dpr, height * dpr);
     camera.aspect = width / Math.max(1, height);
+    // Shift the visible window down so the picture sits higher on upright phones (no-op on landscape).
+    camera.setViewOffset(width, height, 0, portraitLensShift(camera.aspect) * height, width, height);
     camera.updateProjectionMatrix();
   };
   return { renderer, composer, lens, resize, dispose: () => { composer.dispose(); renderer.dispose(); } };

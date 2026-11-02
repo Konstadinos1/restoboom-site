@@ -313,6 +313,21 @@ body::after {
   .station-inner--sticky {
     align-items: flex-end;
   }
+
+  /* Phones: the hero copy is too tall to sit on top of the bistro and stay readable, so the bistro
+     takes the top of the first screen (see portraitLensShift) and the copy starts below it and
+     scrolls normally. The headline and the main button still fit in the first screen. */
+  .station-inner--hero.station-inner--sticky {
+    position: relative;
+    display: block;
+    min-height: 0;
+    padding-top: 50svh;
+  }
+
+  .hero-copy::before {
+    inset: -3rem -1rem -2rem;
+    background: linear-gradient(180deg, transparent, rgb(226 231 237 / 0.8) 3rem, rgb(226 231 237 / 0.8) calc(100% - 2rem), transparent);
+  }
 }
 
 /* ---------- HUD chrome ---------- */
@@ -332,7 +347,8 @@ body::after {
 
   .station-fade {
     animation: panel-exit linear both;
-    animation-timeline: view();
+    /* The 6 rem top inset is the HUD's height: the exit starts as a panel reaches the HUD. */
+    animation-timeline: view(block 6rem 0px);
     animation-range: exit 0% exit 45%;
   }
 }

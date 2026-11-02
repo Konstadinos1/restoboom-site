@@ -53,6 +53,22 @@ export function cameraAt(cursor: number, stations: readonly StationCamera[]): Ca
 
 const PORTRAIT_PULLBACK = 1.35;
 const PORTRAIT_LIFT = 0.9;
+/** Share of the screen height the picture moves up on a phone held upright (see portraitLensShift). */
+const PORTRAIT_LENS_SHIFT = 0.16;
+
+/** 0 on landscape screens, rising to 1 on a phone held upright (aspect <= 0.55). */
+function portraitAmount(aspect: number): number {
+  return aspect >= 1 ? 0 : Math.min(1, (1 - aspect) / 0.45);
+}
+
+/**
+ * Vertical lens shift for portrait screens, as a fraction of the screen
+ * height: the picture slides up like an architect's shift lens (no tilt, so
+ * nothing looks distorted), leaving the lower part for the copy.
+ */
+export function portraitLensShift(aspect: number): number {
+  return PORTRAIT_LENS_SHIFT * portraitAmount(aspect);
+}
 
 /**
  * Portrait screens: pull the camera back so the object fits, centre it
@@ -61,7 +77,7 @@ const PORTRAIT_LIFT = 0.9;
  */
 export function frameForAspect<T extends CameraPose>(frame: T, aspect: number): T {
   if (aspect >= 1) return frame;
-  const k = Math.min(1, (1 - aspect) / 0.45);
+  const k = portraitAmount(aspect);
   const pull = 1 + (PORTRAIT_PULLBACK - 1) * k;
   const target = { x: lerp(frame.target.x, 0, k), y: frame.target.y - PORTRAIT_LIFT * k, z: frame.target.z };
   const pos = {

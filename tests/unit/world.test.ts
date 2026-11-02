@@ -4,7 +4,7 @@ import { chooseTier, classifyWebGL, TIER_CONFIG, type TierSignals } from "@/lib/
 import { dotsPath, GLYPH_COLS, layoutDots, supportedGlyphs } from "@/lib/world/dotMatrix";
 import { BISTRO, BRICK, buildBistroLayout, inOpening, OPENINGS, WALL_HEIGHT } from "@/lib/world/bistroLayout";
 import { assemblyAmount, deconstructAmount, displacedPose, hoverOffset, type BrickRandom } from "@/lib/world/explode";
-import { cameraAt, frameForAspect, scrollCursor, sectionProgress, SETTLE, type StationCamera } from "@/lib/world/director";
+import { cameraAt, frameForAspect, portraitLensShift, scrollCursor, sectionProgress, SETTLE, type StationCamera } from "@/lib/world/director";
 import { scrambleText } from "@/lib/world/scramble";
 
 describe("seeded randomness and noise", () => {
@@ -189,6 +189,14 @@ describe("scroll director", () => {
     // Ends where every other section ends: its bottom at mid-screen.
     expect(sectionProgress(-1500, 2000, 1000, 0)).toBe(1);
     expect(sectionProgress(0, 400, 1000, 0)).toBe(0);
+  });
+
+  it("shifts the picture up only on portrait screens", () => {
+    expect(portraitLensShift(16 / 9)).toBe(0);
+    expect(portraitLensShift(1)).toBe(0);
+    expect(portraitLensShift(0.8)).toBeGreaterThan(0);
+    expect(portraitLensShift(0.46)).toBeCloseTo(0.16);
+    expect(portraitLensShift(0.3)).toBeCloseTo(0.16);
   });
 
   it("turns section progresses into one continuous cursor", () => {
