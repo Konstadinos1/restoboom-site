@@ -1,0 +1,4 @@
+User-Agent: *
+Allow: /
+
+Sitemap: https://konstadinos1.github.io/restoboom-site/sitemap.xml

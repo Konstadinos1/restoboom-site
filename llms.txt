@@ -1,0 +1,19 @@
+# RestoBoom
+
+> RestoBoom is a growth platform for Québec restaurants (French first, English mirror): missed-call text-back in 15 seconds, one inbox for 5 channels per location, review requests with approved replies (no review gating), follow-up sequences with quiet hours, and guest profiles fed by POS data. Data is hosted in Canada; CASL (LCAP) and Québec Law 25 compliant by design; priced in CAD.
+
+## Key facts
+- Missed-call text-back in 15 seconds, in the guest's language.
+- 5 channels (SMS, email, Messenger, Instagram, web chat), one inbox per location.
+- The automated front desk discloses that it is automated.
+- Every guest gets the Google review link, whatever the rating (no gating). Suggested replies require owner approval.
+- Follow-ups respect quiet hours 9 pm–9 am; STOP/ARRET unsubscribes instantly; consent checked before every send.
+- Guest profiles fed by POS data; CSV import from day one. Your phone number stays the same.
+- Pricing (CAD, monthly, GST/QST extra): Solo $149 (1 location, $499 setup), Multi $449 (up to 5 locations, $1,499 setup), Franchise $1,299 (network, $4,999 setup).
+
+## Pages
+- [Accueil (FR)](https://konstadinos1.github.io/restoboom-site/): plateforme, conformité, exemples, FAQ
+- [Home (EN)](https://konstadinos1.github.io/restoboom-site/en/)
+- [Tarifs (FR)](https://konstadinos1.github.io/restoboom-site/tarifs/) · [Pricing (EN)](https://konstadinos1.github.io/restoboom-site/en/pricing/)
+- [Diagnostic gratuit (FR)](https://konstadinos1.github.io/restoboom-site/diagnostic/) · [Free diagnostic (EN)](https://konstadinos1.github.io/restoboom-site/en/diagnostic/)
+- [Confidentialité](https://konstadinos1.github.io/restoboom-site/confidentialite/) · [Privacy](https://konstadinos1.github.io/restoboom-site/en/privacy/)
