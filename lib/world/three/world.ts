@@ -48,7 +48,7 @@ function buildScene(cfg: TierConfig, pmrem: PMREMGenerator, report: (f: number) 
   const bistro = createBistro(cfg, ice);
   const stations = createStations(ice);
   const snow = createSnow(cfg.snowParticles);
-  scene.add(bistro.group, stations.group, snow);
+  scene.add(bistro.group, bistro.lights, stations.group, snow);
   report(0.7);
   return { scene, bistro, stations, snow, env };
 }

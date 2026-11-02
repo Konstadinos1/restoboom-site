@@ -41,7 +41,11 @@ const smooth = (e0: number, e1: number, x: number) => {
   return t * t * (3 - 2 * t);
 };
 
-export type Bistro = { group: Group; update: (intro: number, deconstruct: number, time: number) => void };
+/**
+ * `lights` must stay in the scene and visible even when `group` is hidden far away: three.js keys shader
+ * programs on the number of visible lights, so hiding them would recompile every lit material mid-dive.
+ */
+export type Bistro = { group: Group; lights: Group; update: (intro: number, deconstruct: number, time: number) => void };
 
 function createBricks(layout: Brick[], ice: Material, cfg: TierConfig): InstancedMesh {
   const mesh = new InstancedMesh(new RoundedBoxGeometry(1, 1, 1, 2, 0.07), ice, layout.length);
@@ -183,6 +187,8 @@ export function createBistro(cfg: TierConfig, ice: Material): Bistro {
   const roomGlow = details.interior.room.material.color.clone();
   const group = new Group();
   group.add(bricks, details.interior.group, details.awning, details.sign, details.mullions, details.constellation, details.scaffold);
+  const lights = new Group();
+  lights.add(...details.interior.lights);
   let last = { intro: -1, decon: -1 };
   const update = (intro: number, decon: number, time: number) => {
     // Bricks only need re-posing while something moves: the intro, a scroll, or the hover once apart.
@@ -193,7 +199,7 @@ export function createBistro(cfg: TierConfig, ice: Material): Bistro {
     }
     animateDetails(details, roomGlow, { intro, decon, time });
   };
-  return { group, update };
+  return { group, lights, update };
 }
 
 type Details = {

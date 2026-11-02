@@ -144,6 +144,7 @@ export function createInterior(): Interior {
   const heart = createHeart();
   const furniture = createFurniture();
   const lights = createLights();
-  group.add(room, heart, furniture, createLamps(), ...lights);
+  // The lights are returned, not added: the world keeps them out of the bistro's group (see createBistro).
+  group.add(room, heart, furniture, createLamps());
   return { group, room, heart, furniture, lights };
 }
