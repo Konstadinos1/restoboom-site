@@ -4,22 +4,45 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
-    "start": "next start"
+    "build": "next build && cp public/404.html out/404.html",
+    "build:e2e": "NEXT_PUBLIC_LEAD_ENDPOINT=https://lead.e2e.invalid/functions/v1/diagnostic-lead NEXT_PUBLIC_ANALYTICS_ENDPOINT=https://stats.e2e.invalid/api/event NEXT_PUBLIC_ANALYTICS_DOMAIN=restoboom.ca npm run build",
+    "serve": "node scripts/serve-out.mjs",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:e2e": "playwright test",
+    "lighthouse": "lhci autorun --config=lighthouserc.cjs",
+    "linkcheck": "node scripts/check-links.mjs",
+    "images": "node scripts/generate-images.mjs",
+    "check": "npm run typecheck && npm run test && npm run build:e2e && npm run test:e2e && npm run linkcheck",
+    "test:edge": "cd supabase/functions && deno check --config deno.json diagnostic-lead/index.ts && deno test --config deno.json --allow-env --allow-net diagnostic-lead/"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.0",
     "next": "^15.1.0",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "three": "^0.187.0",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.14.0",
+    "@lhci/cli": "^0.15.1",
+    "@playwright/test": "^1.63.0",
     "@tailwindcss/postcss": "^4.0.0",
     "@types/node": "^22.0.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
-    "postcss": "^8.4.47",
+    "@types/three": "^0.187.0",
+    "@vitest/coverage-v8": "^3.2.7",
+    "linkinator": "^8.1.0",
+    "postcss": "^8.5.32",
     "tailwindcss": "^4.0.0",
-    "typescript": "^5.6.0"
+    "typescript": "^5.6.0",
+    "vitest": "^3.2.7"
+  },
+  "overrides": {
+    "postcss": "$postcss",
+    "playwright-core": "1.63.0"
   }
 }

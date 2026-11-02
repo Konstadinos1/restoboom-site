@@ -1,10 +1,13 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
+  locale: "fr",
+  path: "/confidentialite/",
   title: "Confidentialité",
-  description: "Comment RestoBoom recueille, utilise et protège vos données. Loi 25.",
-  alternates: { canonical: "/confidentialite", languages: { en: "/en/privacy" } },
-};
+  description:
+    "Comment RestoBoom recueille, utilise et protège vos données. Loi 25.",
+});
 
 const SECTIONS: { h: string; body: React.ReactNode }[] = [
   {
@@ -13,7 +16,7 @@ const SECTIONS: { h: string; body: React.ReactNode }[] = [
   },
   {
     h: "2. Données que nous recueillons",
-    body: "Via le formulaire de diagnostic : votre nom, votre courriel, le nom de votre restaurant et l'adresse de votre site ou fiche Google. Via le service : les données clients que vous importez ou connectez (fiches clients, conversations, avis, consentements). Des données techniques minimes (journaux) pour la sécurité et le fonctionnement.",
+    body: "Via le formulaire de diagnostic : votre nom, votre courriel, le nom de votre restaurant et, si vous les donnez, votre téléphone, votre nombre d'adresses et l'adresse de votre site ou fiche Google. On note aussi la provenance de la visite (paramètres UTM d'une campagne) et la version de la page affichée. Via le service : les données clients que vous importez ou connectez (fiches clients, conversations, avis, consentements). Des données techniques minimes (journaux) pour la sécurité et le fonctionnement.",
   },
   {
     h: "3. Pourquoi",
@@ -37,7 +40,7 @@ const SECTIONS: { h: string; body: React.ReactNode }[] = [
   },
   {
     h: "8. Cookies",
-    body: "Ce site marketing n'utilise aucun traceur publicitaire et ne vend aucune donnée.",
+    body: "Ce site marketing n'utilise aucun témoin (cookie) ni traceur publicitaire, et ne vend aucune donnée. Avec votre accord seulement, une mesure d'audience sans témoin compte les visites et les clics, sans vous identifier ; vous pouvez changer d'avis en tout temps depuis le pied de page. Le stockage local du navigateur retient votre choix et la version de page affichée (test A/B).",
   },
   {
     h: "9. Modifications",
@@ -51,12 +54,12 @@ const SECTIONS: { h: string; body: React.ReactNode }[] = [
 
 export default function ConfidentialitePage() {
   return (
-    <section className="wrap max-w-3xl py-20 md:py-28" aria-labelledby="privacy-h1">
+    <section className="wrap max-w-3xl pb-20 pt-32 md:pb-28 md:pt-40" aria-labelledby="privacy-h1">
       <p className="kicker">Confidentialité</p>
       <h1 id="privacy-h1" className="display-lg mt-4">
         Vos données restent vos données.
       </h1>
-      <p className="mt-4 rounded border border-accent-deep bg-panel p-4 text-sm text-muted">
+      <p className="glass mt-6 p-4 text-sm text-muted">
         [FAIRE VALIDER PAR UN JURISTE AVANT LANCEMENT — ébauche en langage clair.]
       </p>
       <div className="mt-12 space-y-10">

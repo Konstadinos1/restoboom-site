@@ -1,0 +1,40 @@
+name: Production site health
+
+# Weekly check of the LIVE site: Lighthouse budgets + every page answers 200.
+# A failure here emails the repo owner (standard Actions notification).
+on:
+  schedule:
+    - cron: "17 11 * * 1" # Mondays 07:17 America/Toronto (EDT)
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  live:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Every sitemap URL returns 200
+        run: |
+          set -euo pipefail
+          urls=$(curl -fsSL https://konstadinos1.github.io/restoboom-site/sitemap.xml | grep -o '<loc>[^<]*' | sed 's/<loc>//')
+          for u in $urls; do
+            code=$(curl -s -o /dev/null -w '%{http_code}' "$u")
+            echo "$code $u"
+            [ "$code" = "200" ]
+          done
+      - run: npx lhci autorun --config=lighthouserc.live.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: live-lighthouse
+          path: .lighthouseci/
+          # The directory is dot-prefixed: upload-artifact@v4 skips hidden paths unless told otherwise.
+          include-hidden-files: true

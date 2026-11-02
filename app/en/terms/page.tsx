@@ -1,10 +1,13 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
+  locale: "en",
+  path: "/en/terms/",
   title: "Terms",
-  description: "Terms of use for the RestoBoom site and service.",
-  alternates: { canonical: "/en/terms", languages: { fr: "/conditions" } },
-};
+  description:
+    "Terms of use for the RestoBoom site and service.",
+});
 
 const SECTIONS: { h: string; body: string }[] = [
   {
@@ -51,12 +54,12 @@ const SECTIONS: { h: string; body: string }[] = [
 
 export default function EnTermsPage() {
   return (
-    <section className="wrap max-w-3xl py-20 md:py-28" aria-labelledby="terms-h1">
+    <section className="wrap max-w-3xl pb-20 pt-32 md:pb-28 md:pt-40" aria-labelledby="terms-h1">
       <p className="kicker">Terms</p>
       <h1 id="terms-h1" className="display-lg mt-4">
         Terms of use.
       </h1>
-      <p className="mt-4 rounded border border-accent-deep bg-panel p-4 text-sm text-muted">
+      <p className="glass mt-6 p-4 text-sm text-muted">
         [TO BE REVIEWED BY A LAWYER BEFORE LAUNCH — plain-language draft.]
       </p>
       <div className="mt-12 space-y-10">

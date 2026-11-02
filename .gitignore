@@ -6,3 +6,8 @@ out/
 .env
 next-env.d.ts
 *.tsbuildinfo
+.lighthouseci/
+test-results/
+playwright-report/
+coverage/
+evidence/
