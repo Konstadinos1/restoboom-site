@@ -381,7 +381,8 @@ body::after {
   z-index: 30;
   pointer-events: none;
   padding-bottom: env(safe-area-inset-bottom, 0px);
-  background: linear-gradient(0deg, rgb(228 233 239 / 0.72), rgb(228 233 239 / 0));
+  /* Opaque enough at the edge that page text scrolling underneath doesn't tangle with the HUD labels. */
+  background: linear-gradient(0deg, rgb(228 233 239 / 0.92) 0%, rgb(228 233 239 / 0.75) 45%, rgb(228 233 239 / 0) 100%);
   transition: opacity 0.4s ease;
 }
 
@@ -406,10 +407,11 @@ body::after {
 }
 
 /* Plain CSS rather than utility classes: .hud-label is unlayered and would beat Tailwind's layered
-   `hidden`. Phones scroll by habit, and there the hint would sit on the hero's second button; the
-   header's "Fait au Québec" tag would add a whole extra HUD row. */
+   `hidden`. The header's "Fait au Québec" tag would add a whole extra HUD row on phones. Phones
+   also skip the bottom HUD: with the hint, coordinates and build bar already gone, only the
+   progress bar would be left, drawn over whatever button sits at the bottom of the screen. */
 @media (max-width: 639px) {
-  .hud-hint,
+  .hud-bottom,
   .hud-label--from-sm {
     display: none;
   }
