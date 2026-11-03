@@ -15,7 +15,8 @@ export const metadata: Metadata = {
   ...(NOINDEX ? { robots: { index: false, follow: false } } : {}),
 };
 
-export const viewport: Viewport = { themeColor: "#06080b", colorScheme: "dark" };
+// Matches the fogged page background, so the phone's address bar blends into the HUD.
+export const viewport: Viewport = { themeColor: "#e4e9ef", colorScheme: "light" };
 
 export default function EnRootLayout({ children }: { children: React.ReactNode }) {
   return <SiteShell locale="en">{children}</SiteShell>;
