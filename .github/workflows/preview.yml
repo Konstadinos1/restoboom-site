@@ -1,0 +1,79 @@
+name: PR preview
+
+# Every pull request from this repository gets a live preview on GitHub Pages at
+# https://<owner>.github.io/restoboom-site/preview/pr-<number>/, rebuilt on each push
+# and removed when the PR is closed. Previews are noindex and their canonical URLs
+# point to production, so they never compete with the live site in search.
+# Note: a deploy from main (deploy.yml) republishes gh-pages from scratch, which also
+# clears previews; an open PR gets its preview back on its next push.
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    # Forks and Dependabot get a read-only token, so they can't publish (and shouldn't).
+    if: github.event.action != 'closed' && github.event.pull_request.head.repo.full_name == github.repository && github.actor != 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # Shared with deploy.yml: one writer to gh-pages at a time.
+    concurrency:
+      group: deploy-pages
+      cancel-in-progress: false
+    environment:
+      name: preview-pr-${{ github.event.number }}
+      url: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/preview/pr-${{ github.event.number }}/
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Preview build (own base path, noindex)
+        run: npm run build
+        env:
+          NEXT_PUBLIC_BASE_PATH: /${{ github.event.repository.name }}/preview/pr-${{ github.event.number }}
+          NEXT_PUBLIC_NOINDEX: "1"
+      - uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./out
+          publish_branch: gh-pages
+          destination_dir: preview/pr-${{ github.event.number }}
+          keep_files: true
+          commit_message: "preview: PR #${{ github.event.number }} at ${{ github.event.pull_request.head.sha }}"
+      - name: Preview link
+        env:
+          PREVIEW_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/preview/pr-${{ github.event.number }}/
+        run: |
+          echo "Preview (live in about a minute, once Pages has rebuilt): $PREVIEW_URL" >> "$GITHUB_STEP_SUMMARY"
+
+  remove:
+    if: github.event.action == 'closed' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    concurrency:
+      group: deploy-pages
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+      - name: Remove this PR's preview
+        env:
+          PREVIEW_DIR: preview/pr-${{ github.event.number }}
+          PR_NUMBER: ${{ github.event.number }}
+        run: |
+          if [ ! -d "$PREVIEW_DIR" ]; then
+            echo "No preview to remove (a deploy from main already cleared it)."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm -r -q "$PREVIEW_DIR"
+          git commit -m "preview: remove PR #$PR_NUMBER"
+          git push origin gh-pages

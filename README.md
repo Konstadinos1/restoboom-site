@@ -48,6 +48,11 @@ Plus generated `sitemap.xml` (hreflang fr-CA/en-CA/x-default), `robots.txt`, `ma
 - **Deploy** (`deploy.yml`, push to `main`): re-runs typecheck + unit tests, builds with repo *Variables*,
   publishes `out/` to `gh-pages`. **Merging to `main` therefore updates the live site.**
   `scripts/deploy-pages.sh` still works for a manual deploy.
+- **PR previews** (`preview.yml`, every pull request from this repo): builds the PR under its own path and
+  publishes it to `https://konstadinos1.github.io/restoboom-site/preview/pr-<number>/` (the PR shows a
+  "View deployment" button). Previews are `noindex` with canonical URLs on production, and are removed when the
+  PR closes. A deploy from `main` republishes gh-pages from scratch, so open PRs get their preview back on their
+  next push.
 - **Production health** (`site-health.yml`, Mondays): every sitemap URL must return 200, and Lighthouse
   budgets are checked against the live site.
 - **Dependabot**: weekly npm (grouped minor/patch), monthly Actions.
