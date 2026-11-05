@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
-  clockHandAngles, crackPath, heartOutline, mapleLeafOutline, pricingVillage, speechBubbleOutline, starOutline, steppingStones,
+  centroid, clockHandAngles, crackPath, crackRegions, edgeCrack, heartOutline, mapleLeafOutline, perimeterPosition, pricingVillage, rayToEdge,
+  signedArea, speechBubbleOutline, starOutline, steppingStones,
 } from "@/lib/world/stationShapes";
 
 const closeTo = (a: number, b: number) => Math.abs(a - b) < 1e-9;
@@ -52,6 +53,63 @@ describe("crack paths", () => {
   it("runs straight with no jitter", () => {
     const straight = crackPath(1, { x: 0, y: 0 }, Math.PI / 2, 1, 4, 0);
     expect(straight.every((p) => closeTo(p.x, 0))).toBe(true);
+  });
+});
+
+describe("a face split by cracks", () => {
+  const rect = { w: 3.4, h: 2.4 };
+  const impact = { x: -0.35, y: 0.2 };
+  const angles = [0.35, 2.5, -2.4, -0.75];
+  const cracks = angles.map((a, i) => edgeCrack(41 + i, impact, a, rect, 9, 0.45, 0.06));
+  const onBorder = (p: { x: number; y: number }) =>
+    Math.min(Math.abs(Math.abs(p.x) - rect.w / 2), Math.abs(Math.abs(p.y) - rect.h / 2)) < 1e-9;
+
+  it("finds where a ray leaves the rectangle", () => {
+    expect(rayToEdge({ x: 0, y: 0 }, 0, rect)).toEqual({ x: 1.7, y: 0 });
+    const up = rayToEdge({ x: 0.5, y: 0 }, Math.PI / 2, rect);
+    expect(up.x).toBeCloseTo(0.5);
+    expect(up.y).toBeCloseTo(1.2);
+    const corner = rayToEdge({ x: 0, y: 0 }, Math.atan2(1.2, 1.7), rect);
+    expect(corner.x).toBeCloseTo(1.7);
+    expect(corner.y).toBeCloseTo(1.2);
+  });
+
+  it("runs every crack from the impact point to the border, staying on the face", () => {
+    for (const crack of cracks) {
+      expect(crack[0]).toEqual(impact);
+      expect(onBorder(crack[crack.length - 1])).toBe(true);
+      crack.forEach((p) => {
+        expect(Math.abs(p.x)).toBeLessThanOrEqual(rect.w / 2 + 1e-9);
+        expect(Math.abs(p.y)).toBeLessThanOrEqual(rect.h / 2 + 1e-9);
+      });
+    }
+  });
+
+  it("measures positions along the border counter-clockwise from the bottom-left corner", () => {
+    expect(perimeterPosition({ x: -1.7, y: -1.2 }, rect)).toBeCloseTo(0);
+    expect(perimeterPosition({ x: 1.7, y: 0 }, rect)).toBeCloseTo(3.4 + 1.2);
+    expect(perimeterPosition({ x: 0, y: 1.2 }, rect)).toBeCloseTo(3.4 + 2.4 + 1.7);
+    expect(perimeterPosition({ x: -1.7, y: 0 }, rect)).toBeCloseTo(2 * 3.4 + 2.4 + 1.2);
+  });
+
+  it("breaks the face into one counter-clockwise piece per crack that together cover it exactly", () => {
+    const pieces = crackRegions(cracks, rect);
+    expect(pieces).toHaveLength(cracks.length);
+    pieces.forEach((piece) => expect(signedArea(piece)).toBeGreaterThan(0.05));
+    const total = pieces.reduce((sum, piece) => sum + signedArea(piece), 0);
+    expect(total).toBeCloseTo(rect.w * rect.h, 9);
+  });
+
+  it("puts each piece's centre on its own side of the impact point", () => {
+    const directions = crackRegions(cracks, rect).map((piece) => {
+      const c = centroid(piece);
+      return Math.atan2(c.y - impact.y, c.x - impact.x);
+    });
+    expect(new Set(directions.map((d) => Math.round(d * 10))).size).toBe(cracks.length);
+  });
+
+  it("needs at least two cracks to split anything", () => {
+    expect(() => crackRegions([cracks[0]], rect)).toThrow(/at least two cracks/);
   });
 });
 

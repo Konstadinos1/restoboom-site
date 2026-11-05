@@ -81,6 +81,96 @@ export function crackPath(seed: number, start: Vec2, angle: number, length: numb
   return points;
 }
 
+/** A rectangle centred on the origin. */
+export type Rect = { w: number; h: number };
+
+const EDGE_EPSILON = 1e-6;
+
+/** Where a ray from `from` (inside the rectangle) heading `angle` leaves it. */
+export function rayToEdge(from: Vec2, angle: number, rect: Rect): Vec2 {
+  const dx = Math.cos(angle);
+  const dy = Math.sin(angle);
+  const exitX = dx > 0 ? (rect.w / 2 - from.x) / dx : dx < 0 ? (-rect.w / 2 - from.x) / dx : Infinity;
+  const exitY = dy > 0 ? (rect.h / 2 - from.y) / dy : dy < 0 ? (-rect.h / 2 - from.y) / dy : Infinity;
+  const t = Math.max(0, Math.min(exitX, exitY));
+  return { x: from.x + dx * t, y: from.y + dy * t };
+}
+
+const clampInside = (p: Vec2, rect: Rect, inset: number): Vec2 => ({
+  x: Math.max(-rect.w / 2 + inset, Math.min(rect.w / 2 - inset, p.x)),
+  y: Math.max(-rect.h / 2 + inset, Math.min(rect.h / 2 - inset, p.y)),
+});
+
+/**
+ * A crack from `start` right across to the face's border: the jagged path kept
+ * `inset` inside the face, then finished straight to the edge along `angle`, so
+ * the cracks cut the face into separate pieces (see crackRegions).
+ */
+export function edgeCrack(seed: number, start: Vec2, angle: number, rect: Rect, segments: number, jitter: number, inset: number): Vec2[] {
+  const end = rayToEdge(start, angle, rect);
+  const reach = Math.hypot(end.x - start.x, end.y - start.y);
+  const path = crackPath(seed, start, angle, reach * 0.85, segments, jitter).map((p) => clampInside(p, rect, inset));
+  return [...path, rayToEdge(path[path.length - 1], angle, rect)];
+}
+
+/** Distance along the border, counter-clockwise from the bottom-left corner, of a point on it. */
+export function perimeterPosition(p: Vec2, rect: Rect): number {
+  const hw = rect.w / 2;
+  const hh = rect.h / 2;
+  const distances = [Math.abs(p.y + hh), Math.abs(p.x - hw), Math.abs(p.y - hh), Math.abs(p.x + hw)];
+  const side = distances.indexOf(Math.min(...distances));
+  if (side === 0) return p.x + hw;
+  if (side === 1) return rect.w + p.y + hh;
+  if (side === 2) return rect.w + rect.h + hw - p.x;
+  return 2 * rect.w + rect.h + hh - p.y;
+}
+
+function cornersBetween(from: number, to: number, rect: Rect): Vec2[] {
+  const perimeter = 2 * (rect.w + rect.h);
+  const hw = rect.w / 2;
+  const hh = rect.h / 2;
+  const corners = [
+    { t: 0, p: { x: -hw, y: -hh } }, { t: rect.w, p: { x: hw, y: -hh } },
+    { t: rect.w + rect.h, p: { x: hw, y: hh } }, { t: 2 * rect.w + rect.h, p: { x: -hw, y: hh } },
+  ];
+  const span = (((to - from) % perimeter) + perimeter) % perimeter;
+  const ahead = (t: number) => (((t - from) % perimeter) + perimeter) % perimeter;
+  return corners
+    .filter((c) => ahead(c.t) > EDGE_EPSILON && ahead(c.t) < span - EDGE_EPSILON)
+    .sort((a, b) => ahead(a.t) - ahead(b.t))
+    .map((c) => c.p);
+}
+
+/**
+ * The pieces a face breaks into along cracks that all start at one point and
+ * end on its border (as edgeCrack draws them): one counter-clockwise outline
+ * per piece, each between two neighbouring cracks.
+ */
+export function crackRegions(cracks: readonly Vec2[][], rect: Rect): Vec2[][] {
+  if (cracks.length < 2) throw new Error("crackRegions: it takes at least two cracks to split a face");
+  const order = [...cracks].sort((a, b) => perimeterPosition(a[a.length - 1], rect) - perimeterPosition(b[b.length - 1], rect));
+  return order.map((crack, i) => {
+    const next = order[(i + 1) % order.length];
+    const from = perimeterPosition(crack[crack.length - 1], rect);
+    const to = perimeterPosition(next[next.length - 1], rect);
+    // Out along this crack, round the border to the next one, and back in along it (minus the shared start).
+    return [...crack, ...cornersBetween(from, to, rect), ...[...next].reverse().slice(0, -1)];
+  });
+}
+
+/** Signed area of an outline: positive when it runs counter-clockwise. */
+export function signedArea(outline: readonly Vec2[]): number {
+  return outline.reduce((sum, p, i) => {
+    const q = outline[(i + 1) % outline.length];
+    return sum + (p.x * q.y - q.x * p.y) / 2;
+  }, 0);
+}
+
+export function centroid(outline: readonly Vec2[]): Vec2 {
+  const n = outline.length;
+  return { x: outline.reduce((s, p) => s + p.x, 0) / n, y: outline.reduce((s, p) => s + p.y, 0) / n };
+}
+
 /** Hand angles for a wall clock, radians clockwise from 12 o'clock. */
 export function clockHandAngles(hours: number, minutes: number): { hour: number; minute: number } {
   const totalMinutes = (hours % HOURS_ON_DIAL) * MINUTES_PER_HOUR + minutes;

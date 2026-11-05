@@ -1,45 +1,95 @@
 /**
- * Station 03, "what leaks": a slab of ice splitting along four glowing cracks,
- * one per pain point in the panel. Each crack runs out in turn as the visitor
- * scrolls, and small shards drift off the face like money leaking away.
+ * Station 03, "what leaks": a slab of ice breaking along four glowing cracks,
+ * one per pain point in the panel. As the visitor scrolls, the cracks run out
+ * one after another, the pieces part and tip outwards, and the warm glow
+ * behind them shows through the gaps while shards drift off like money
+ * leaking away.
  */
-import { CatmullRomCurve3, Group, InstancedMesh, Matrix4, Mesh, Quaternion, TetrahedronGeometry, TubeGeometry, Vector3 } from "three";
-import { RoundedBoxGeometry } from "three/examples/jsm/geometries/RoundedBoxGeometry.js";
-import { createRng } from "../../random";
-import { crackPath, type Vec2 } from "../../stationShapes";
+import {
+  CatmullRomCurve3, ExtrudeGeometry, Group, InstancedMesh, Matrix4, Mesh, PlaneGeometry, Quaternion, Shape, TetrahedronGeometry, TubeGeometry,
+  Vector2, Vector3,
+} from "three";
+import { clamp01, createRng, easeInOutCubic } from "../../random";
+import { centroid, crackRegions, edgeCrack, type Rect, type Vec2 } from "../../stationShapes";
 import type { StationKit, StationScene, StationTick } from "./kit";
 
-const SLAB = { w: 3.4, h: 2.4, d: 0.5 } as const;
+const SLAB: Rect & { d: number } = { w: 3.4, h: 2.4, d: 0.46 };
 const IMPACT: Vec2 = { x: -0.35, y: 0.2 };
-// One heading per pain point (radians), long enough to reach the slab's edge.
-const CRACKS = [
-  { angle: 0.35, length: 1.9 }, { angle: 2.5, length: 1.4 }, { angle: -2.4, length: 1.3 }, { angle: -0.75, length: 1.6 },
-] as const;
+// One heading per pain point (radians).
+const CRACK_ANGLES = [0.35, 2.5, -2.4, -0.75] as const;
 const CRACK_SEGMENTS = 9;
 const CRACK_JITTER = 0.45;
-const CRACK_RADIUS = 0.016;
-const GROOVE_WIDTH = 2.6;
-const GROOVE_DEPTH = -0.03;
-const GLOW_DEPTH = 0.004;
+const CRACK_INSET = 0.08;
+const CRACK_SEED = 41;
+const PIECE_BEVEL = 0.035;
+/** How far the pieces part, and how far they tip outwards (radians), once the slab is fully broken. */
+const GAP = 0.13;
+const TILT = 0.11;
+const CORE_RADIUS = 0.017;
 const RADIAL_SEGMENTS = 5;
+const BED_INSET = 0.12;
+const BED_DEPTH = 0.06;
 const REVEAL_STAGGER = 0.17;
 const REVEAL_SPAN = 0.32;
+const OPEN_START = 0.05;
+const OPEN_SPAN = 0.6;
 const SHARDS = 28;
 const SHARD_TRAVEL = 1.6;
 
-/** The crack's path across the slab's front face (clamped to the slab), `depth` in front of the face. */
-function crackCurve(index: number, depth: number): CatmullRomCurve3 {
-  const c = CRACKS[index];
-  const points = crackPath(41 + index, IMPACT, c.angle, c.length, CRACK_SEGMENTS, CRACK_JITTER)
-    .map((p) => new Vector3(Math.max(-SLAB.w / 2, Math.min(SLAB.w / 2, p.x)), Math.max(-SLAB.h / 2, Math.min(SLAB.h / 2, p.y)), SLAB.d / 2 + depth));
-  return new CatmullRomCurve3(points);
+const CRACKS: readonly Vec2[][] = CRACK_ANGLES.map((angle, i) => edgeCrack(CRACK_SEED + i, IMPACT, angle, SLAB, CRACK_SEGMENTS, CRACK_JITTER, CRACK_INSET));
+
+/** How much of crack `index` glows: they run out one after another through the section. */
+function revealOf(index: number, local: number): number {
+  return clamp01((local * 1.15 - index * REVEAL_STAGGER) / REVEAL_SPAN);
 }
 
-const crackTube = (curve: CatmullRomCurve3, radius: number) => new TubeGeometry(curve, CRACK_SEGMENTS * 6, radius, RADIAL_SEGMENTS, false);
+/** How far the slab has broken apart, 0..1. */
+const openOf = (local: number) => easeInOutCubic(clamp01((local - OPEN_START) / OPEN_SPAN));
 
-/** How much of crack `index` is drawn: they run out one after another through the section. */
-function revealOf(index: number, local: number): number {
-  return Math.min(1, Math.max(0, (local * 1.15 - index * REVEAL_STAGGER) / REVEAL_SPAN));
+type Piece = { pivot: Group; home: Vec2; direction: Vec2; tiltAxis: Vector3; phase: number };
+
+/** One solid of ice per region between two cracks, pivoting about its own centre so it tips in place. */
+function createPieces(kit: StationKit): Piece[] {
+  const depth = SLAB.d - 2 * PIECE_BEVEL;
+  return crackRegions(CRACKS, SLAB).map((outline, i) => {
+    const geometry = new ExtrudeGeometry(new Shape(outline.map((p) => new Vector2(p.x, p.y))), {
+      depth, bevelEnabled: true, bevelThickness: PIECE_BEVEL, bevelSize: PIECE_BEVEL, bevelOffset: -PIECE_BEVEL, bevelSegments: 2, curveSegments: 1,
+    });
+    const middle = centroid(outline);
+    // Centre the solid on its pivot: the bevel keeps neighbouring pieces from overlapping along the cracks.
+    geometry.translate(-middle.x, -middle.y, -depth / 2);
+    const pivot = new Group();
+    pivot.position.set(middle.x, middle.y, 0);
+    pivot.add(new Mesh(geometry, kit.ice));
+    const length = Math.hypot(middle.x - IMPACT.x, middle.y - IMPACT.y) || 1;
+    const direction = { x: (middle.x - IMPACT.x) / length, y: (middle.y - IMPACT.y) / length };
+    return { pivot, home: middle, direction, tiltAxis: new Vector3(-direction.y, direction.x, 0), phase: i * 1.3 };
+  });
+}
+
+const tilt = new Quaternion();
+
+function placePieces(pieces: Piece[], open: number, time: number): void {
+  pieces.forEach(({ pivot, home, direction, tiltAxis, phase }) => {
+    const drift = Math.sin(time * 0.8 + phase) * 0.008 * open;
+    pivot.position.set(home.x + direction.x * GAP * open, home.y + direction.y * GAP * open, drift);
+    pivot.quaternion.copy(tilt.setFromAxisAngle(tiltAxis, -TILT * open));
+  });
+}
+
+/** The hot filament running down the middle of each crack, inside the slab. */
+function createCores(kit: StationKit): Mesh[] {
+  return CRACKS.map((crack) => {
+    const curve = new CatmullRomCurve3(crack.map((p) => new Vector3(p.x, p.y, 0)));
+    return new Mesh(new TubeGeometry(curve, CRACK_SEGMENTS * 6, CORE_RADIUS, RADIAL_SEGMENTS, false), kit.ember);
+  });
+}
+
+/** Warm light behind the slab: only seen through the gaps as the pieces part. */
+function createBed(kit: StationKit): Mesh {
+  const bed = new Mesh(new PlaneGeometry(SLAB.w - 2 * BED_INSET, SLAB.h - 2 * BED_INSET), kit.emberSoft);
+  bed.position.z = -SLAB.d / 2 + BED_DEPTH;
+  return bed;
 }
 
 function createShards(kit: StationKit): { mesh: InstancedMesh; seeds: number[][] } {
@@ -60,8 +110,8 @@ function driftShards(shards: { mesh: InstancedMesh; seeds: number[][] }, time: n
   shards.seeds.forEach(([a, b, c, d], i) => {
     const phase = (time * (0.08 + a * 0.06) + b) % 1;
     const crack = CRACKS[i % CRACKS.length];
-    const along = 0.3 + c * crack.length * 0.8;
-    at.set(IMPACT.x + Math.cos(crack.angle) * along, IMPACT.y + Math.sin(crack.angle) * along, SLAB.d / 2 + phase * SHARD_TRAVEL * opened);
+    const from = crack[1 + Math.floor(c * (crack.length - 2))];
+    at.set(from.x, from.y, SLAB.d / 2 + phase * SHARD_TRAVEL * opened);
     q.setFromAxisAngle(SPIN_AXIS, time * (0.6 + d) + i);
     shards.mesh.setMatrixAt(i, m4.compose(at, q, size.setScalar(Math.max(0.001, opened * (1 - phase)))));
   });
@@ -70,21 +120,16 @@ function driftShards(shards: { mesh: InstancedMesh; seeds: number[][] }, time: n
 
 export function createCracksScene(kit: StationKit): StationScene {
   const group = new Group();
-  const slab = new Mesh(new RoundedBoxGeometry(SLAB.w, SLAB.h, SLAB.d, 3, 0.1), kit.ice);
-  // Each crack is a thin glow over a wider dark groove half-buried in the face, so it reads as cut into
-  // the ice rather than laid on it (the groove sits deeper, or it would swallow the glow).
-  const tubes = CRACKS.flatMap((_, i) => [
-    new Mesh(crackTube(crackCurve(i, GROOVE_DEPTH), CRACK_RADIUS * GROOVE_WIDTH), kit.slate),
-    new Mesh(crackTube(crackCurve(i, GLOW_DEPTH), CRACK_RADIUS), kit.ember),
-  ]);
+  const pieces = createPieces(kit);
+  const cores = createCores(kit);
   const shards = createShards(kit);
-  group.add(slab, ...tubes, shards.mesh);
+  group.add(...pieces.map((p) => p.pivot), ...cores, createBed(kit), shards.mesh);
   const update = ({ time, local }: StationTick) => {
-    tubes.forEach((tube, i) => {
-      const total = tube.geometry.index?.count ?? 0;
-      const quads = Math.floor((total / 6) * revealOf(Math.floor(i / 2), local));
-      tube.geometry.setDrawRange(0, quads * 6);
+    cores.forEach((core, i) => {
+      const total = core.geometry.index?.count ?? 0;
+      core.geometry.setDrawRange(0, Math.floor((total / 6) * revealOf(i, local)) * 6);
     });
+    placePieces(pieces, openOf(local), time);
     driftShards(shards, time, revealOf(0, local));
     group.rotation.set(-0.06 + Math.sin(time * 0.4) * 0.03, 0.42 + Math.sin(time * 0.25) * 0.05, -0.04);
   };
