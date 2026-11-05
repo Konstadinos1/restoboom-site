@@ -4,11 +4,11 @@
  * small builders. One kit per world, so materials compile once.
  */
 import {
-  Color, ExtrudeGeometry, Group, InstancedMesh, Matrix4, Mesh, MeshBasicMaterial, MeshStandardMaterial, Shape, Vector2, type Material,
+  Color, ExtrudeGeometry, Group, InstancedMesh, Matrix4, Mesh, MeshBasicMaterial, MeshStandardMaterial, Shape, Vector2, type Material, type Object3D,
 } from "three";
 import { RoundedBoxGeometry } from "three/examples/jsm/geometries/RoundedBoxGeometry.js";
 import { layoutDots } from "../../dotMatrix";
-import { GLOW_INTENSITY, ROOM_GLOW, WORLD } from "../../palette";
+import { GLOW_INTENSITY, ROOM_GLOW, WARM_GLOW, WORLD } from "../../palette";
 import type { Vec2 } from "../../stationShapes";
 import type { TierConfig } from "../../tiers";
 import { createShellMaterial } from "../ice";
@@ -23,13 +23,26 @@ export type StationKit = {
   ember: MeshBasicMaterial;
   /** Warm glow below the bloom threshold: stays a saturated orange. */
   emberSoft: MeshBasicMaterial;
+  /** Between the two: a small object that glows orange with a light halo instead of blooming to peach. */
+  emberWarm: MeshBasicMaterial;
   /** Dark details (clock face, bolts). */
   slate: MeshStandardMaterial;
 };
 
 /** One frame of a station: seconds since start, progress through its section (0..1), and whether it is the current one. */
 export type StationTick = { time: number; local: number; active: boolean };
-export type StationScene = { group: Group; update: (tick: StationTick) => void };
+
+/** Objects in a station the visitor can point at and open (the platform's module cubes). */
+export type Explorable = {
+  /** Meshes the pointer can hit; each one's userData.exploreIndex names the item it belongs to. */
+  targets: readonly Object3D[];
+  /** The item under the pointer (or under its content card), or null. */
+  setHovered: (index: number | null) => void;
+  /** The opened item, or null to close it. */
+  setOpened: (index: number | null) => void;
+};
+
+export type StationScene = { group: Group; update: (tick: StationTick) => void; explorable?: Explorable };
 
 const SLATE = "#2c3045";
 const SHELL_RENDER_ORDER = 1;
@@ -43,6 +56,7 @@ export function createStationKit(cfg: TierConfig, ice: Material): StationKit {
     shell: createShellMaterial(cfg),
     ember: glow(GLOW_INTENSITY),
     emberSoft: glow(ROOM_GLOW),
+    emberWarm: glow(WARM_GLOW),
     slate: new MeshStandardMaterial({ color: SLATE, roughness: 0.6, metalness: 0.1 }),
   };
 }

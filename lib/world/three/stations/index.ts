@@ -7,7 +7,7 @@ import { Group } from "three";
 import { STATION_IDS, stationAnchor, stationLocal, type StationId } from "../../stations";
 import { createClockScene } from "./clock";
 import { createCracksScene } from "./cracks";
-import type { StationKit, StationScene } from "./kit";
+import type { Explorable, StationKit, StationScene } from "./kit";
 import { createMessagesScene } from "./messages";
 import { createModulesScene } from "./modules";
 import { createQuestionScene } from "./question";
@@ -33,7 +33,12 @@ const VISIBLE_RANGE = 32;
 const BOB = { height: 0.12, speed: 0.6 } as const;
 
 type Point = { x: number; y: number; z: number };
-export type Stations = { group: Group; update: (time: number, station: number, local: number, camera: Point) => void };
+export type Stations = {
+  group: Group;
+  update: (time: number, station: number, local: number, camera: Point) => void;
+  /** Station index → the objects in it the visitor can point at and open. */
+  explorables: ReadonlyMap<number, Explorable>;
+};
 
 export function createStations(kit: StationKit): Stations {
   const group = new Group();
@@ -55,5 +60,6 @@ export function createStations(kit: StationKit): Stations {
       scene.update({ time, local: stationLocal(index, station, local), active: index === station });
     }
   };
-  return { group, update };
+  const explorables = new Map(placed.flatMap(({ index, scene }) => (scene.explorable ? [[index, scene.explorable] as const] : [])));
+  return { group, update, explorables };
 }

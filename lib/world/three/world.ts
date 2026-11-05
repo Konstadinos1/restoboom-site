@@ -13,6 +13,7 @@ import { createBistro, type Bistro } from "./bistro";
 import { createIceMaterial } from "./ice";
 import { addLights, createSky, createSnow, createTerrain } from "./environment";
 import { createPipeline, createRenderer, type Pipeline } from "./renderer";
+import { createExplorer, type Explorer } from "./explorer";
 import { createStationKit, createStations, type Stations } from "./stations/index";
 
 const INTRO_SECONDS = 2.8;
@@ -110,6 +111,7 @@ export async function mountWorld(canvas: HTMLCanvasElement, opts: WorldOptions):
 type LoopParts = { canvas: HTMLCanvasElement; opts: WorldOptions; built: Built; pipe: Pipeline; pmrem: PMREMGenerator; rig: Rig };
 
 function startLoop({ canvas, opts, built, pipe, pmrem, rig }: LoopParts): WorldHandle {
+  const explorer: Explorer = createExplorer(rig.camera, built.stations.explorables);
   let introStart = -1;
   let last = performance.now();
   const loop = (nowMs: number) => {
@@ -119,6 +121,7 @@ function startLoop({ canvas, opts, built, pipe, pmrem, rig }: LoopParts): WorldH
     if (introStart < 0) introStart = nowMs;
     const frame = cameraAt(scrollCursor(opts.readProgress()), STATION_CAMERAS);
     stepRig(rig, frame, dt);
+    explorer.update(frame.station);
     renderFrame(built, pipe, rig, frame, { now: nowMs / 1000, intro: Math.min(1, (nowMs - introStart) / 1000 / INTRO_SECONDS) });
     opts.onFrame?.(frame);
   };
@@ -131,6 +134,7 @@ function startLoop({ canvas, opts, built, pipe, pmrem, rig }: LoopParts): WorldH
   return {
     dispose: () => {
       pipe.renderer.setAnimationLoop(null);
+      explorer.dispose();
       resize.disconnect();
       document.removeEventListener("visibilitychange", onVisibility);
       disposeScene(built);

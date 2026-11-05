@@ -9,6 +9,7 @@ import JsonLd from "./JsonLd";
 import PricingTable from "./PricingTable";
 import WorldCanvas from "./world/WorldCanvas";
 import HudBottom from "./world/HudBottom";
+import ExploreReadout from "./world/ExploreReadout";
 
 const delay = (ms: number) => ({ "--reveal-delay": ms }) as CSSProperties;
 const HERO_STAGGER_MS = 70;
@@ -130,7 +131,7 @@ function Platform({ locale }: { locale: Locale }) {
       </div>
       <div className="mt-[40svh] grid gap-4 md:grid-cols-2 md:gap-5">
         {t.modules.map((m, i) => (
-          <article key={m.id} id={m.id} className="glass ticks p-6 md:p-7" data-reveal style={delay(i * 80)} aria-labelledby={`mod-${m.id}`}>
+          <article key={m.id} id={m.id} className="module-card glass ticks p-6 md:p-7" data-reveal data-explore-index={i} style={delay(i * 80)} aria-labelledby={`mod-${m.id}`}>
             <p className="flex flex-wrap items-center gap-1.5">
               <span className="hud-label">{`MODULE_${m.num}`}</span>
               <span className="hud-label hud-label--light">{m.tag}</span>
@@ -289,6 +290,7 @@ export default function HomeView({ locale }: { locale: Locale }) {
         <Closer locale={locale} />
       </div>
       <HudBottom locale={locale} />
+      <ExploreReadout locale={locale} modules={c.platform.modules} />
     </>
   );
 }

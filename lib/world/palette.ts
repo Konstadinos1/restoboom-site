@@ -26,3 +26,5 @@ export const GLOW_INTENSITY = 3.2;
  * threshold so ACES keeps them a saturated orange instead of washing to peach.
  */
 export const ROOM_GLOW = 1.15;
+/** Small glowing objects frozen in clear ice (cracks, module objects): just over the bloom threshold. */
+export const WARM_GLOW = 1.7;

@@ -15,19 +15,27 @@ const TINT_SPREAD = 0.18;
 // Runs after lighting, before tone mapping: faces facing the camera look into the ice (bluer, darker),
 // grazing faces and rounded edges catch the cold sky (brighter). Refractive ice already darkens by
 // absorbing light, so it only takes a light touch of the facing tint.
-const iceShade = (depthTint: string) => /* glsl */ `
+const iceShade = (depthTint: string, alpha: string) => /* glsl */ `
   float iceFacing = clamp(dot(normalize(vViewPosition), normal), 0.0, 1.0);
   float iceRim = pow(1.0 - iceFacing, 2.5);
   outgoingLight = outgoingLight * mix(vec3(${depthTint}), vec3(1.0), iceRim) + vec3(0.09, 0.12, 0.15) * iceRim;
+  ${alpha}
   #include <opaque_fragment>`;
 const SOLID_DEPTH_TINT = "0.8, 0.88, 0.97";
 const REFRACTIVE_DEPTH_TINT = "0.95, 0.98, 1.0";
+/**
+ * See-through ice without refraction: almost clear where you look straight into it, frosted at grazing
+ * angles, so a cube reads as a clear block with bright edges instead of a grey haze over what's inside.
+ */
+const CLEAR_FACE_ALPHA = 0.12;
+const CLEAR_RIM_ALPHA = 0.72;
+const CLEAR_ALPHA = `diffuseColor.a = mix(${CLEAR_FACE_ALPHA.toFixed(2)}, ${CLEAR_RIM_ALPHA.toFixed(2)}, iceRim);`;
 
-function withIceShading<T extends MeshStandardMaterial>(material: T, depthTint: string): T {
+function withIceShading<T extends MeshStandardMaterial>(material: T, depthTint: string, alpha = ""): T {
   material.onBeforeCompile = (shader) => {
-    shader.fragmentShader = shader.fragmentShader.replace("#include <opaque_fragment>", iceShade(depthTint));
+    shader.fragmentShader = shader.fragmentShader.replace("#include <opaque_fragment>", iceShade(depthTint, alpha));
   };
-  material.customProgramCacheKey = () => `${ICE_PROGRAM_KEY}-${depthTint}`;
+  material.customProgramCacheKey = () => `${ICE_PROGRAM_KEY}-${depthTint}${alpha ? "-clear" : ""}`;
   return material;
 }
 
@@ -44,8 +52,6 @@ export function createIceMaterial(cfg: TierConfig): MeshStandardMaterial {
   return withIceShading(new MeshStandardMaterial({ color: WORLD.iceTint, roughness: 0.18, metalness: 0.02, envMapIntensity: 0.8 }), SOLID_DEPTH_TINT);
 }
 
-const SHELL_OPACITY = 0.3;
-
 /** See-through ice that the station objects are frozen in: clearer than the bricks so the object reads. */
 export function createShellMaterial(cfg: TierConfig): MeshStandardMaterial {
   if (cfg.transmission) {
@@ -57,10 +63,10 @@ export function createShellMaterial(cfg: TierConfig): MeshStandardMaterial {
       REFRACTIVE_DEPTH_TINT,
     );
   }
-  const shell = new MeshStandardMaterial({ color: WORLD.iceTint, roughness: 0.15, metalness: 0.02, envMapIntensity: 0.9 });
-  // Without refraction, the only way to see what is frozen inside is plain transparency.
-  Object.assign(shell, { transparent: true, opacity: SHELL_OPACITY, depthWrite: false });
-  return withIceShading(shell, SOLID_DEPTH_TINT);
+  const shell = new MeshStandardMaterial({ color: WORLD.iceClear, roughness: 0.12, metalness: 0.02, envMapIntensity: 0.9 });
+  // Without refraction, the only way to see what is frozen inside is transparency (set per pixel by CLEAR_ALPHA).
+  Object.assign(shell, { transparent: true, depthWrite: false });
+  return withIceShading(shell, SOLID_DEPTH_TINT, CLEAR_ALPHA);
 }
 
 /** Natural variation between blocks: each one a little brighter, greyer or bluer, fixed per seed. */

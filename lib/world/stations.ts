@@ -13,6 +13,8 @@ export const VOID_Y = 70;
 export const STATION_SPACING = 60;
 const HERO_FOG = 0.02;
 const VOID_FOG = 0.07;
+/** The platform's cubes are framed from farther back (four of them): thinner fog keeps them clear. */
+const PLATFORM_FOG = 0.045;
 
 /** Where a floating station's object lives. */
 export function stationAnchor(index: number): Vec3 {
@@ -29,13 +31,13 @@ const v = (x: number, y: number, z: number): Vec3 => ({ x, y, z });
 const add = (a: Vec3, b: Vec3): Vec3 => ({ x: a.x + b.x, y: a.y + b.y, z: a.z + b.z });
 
 /** Panels sit on one side; the object is framed on the other by shifting the look-at target. */
-function voidStation(index: number, panelSide: "left" | "right", distance = 9): StationCamera {
+function voidStation(index: number, panelSide: "left" | "right", distance = 9, fog = VOID_FOG): StationCamera {
   const a = stationAnchor(index);
   const shift = panelSide === "left" ? -1.6 : 1.6;
   return {
     from: { pos: add(a, v(0, 0.9, distance)), target: add(a, v(shift, 0.2, 0)), fov: 36 },
     to: { pos: add(a, v(panelSide === "left" ? 1.6 : -1.6, 0.4, distance * 0.72)), target: add(a, v(shift * 0.8, 0.1, 0)), fov: 38 },
-    fog: VOID_FOG,
+    fog,
   };
 }
 
@@ -43,7 +45,7 @@ export const STATION_CAMERAS: readonly StationCamera[] = [
   { from: { pos: v(-1.6, 3.4, 17.5), target: v(-4.4, 1.9, 0), fov: 34 }, to: { pos: v(-4.0, 2.8, 11), target: v(-3.2, 2.2, 0), fov: 38 }, fog: HERO_FOG },
   voidStation(1, "left"),
   voidStation(2, "right"),
-  voidStation(3, "left", 13),
+  voidStation(3, "left", 13, PLATFORM_FOG),
   voidStation(4, "right"),
   voidStation(5, "left"),
   voidStation(6, "right", 10),
