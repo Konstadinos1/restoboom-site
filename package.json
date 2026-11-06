@@ -16,6 +16,7 @@
     "linkcheck": "node scripts/check-links.mjs",
     "images": "node scripts/generate-images.mjs",
     "stills": "node scripts/render-stills.mjs",
+    "404": "node scripts/generate-404.mjs",
     "check": "npm run typecheck && npm run test && npm run build:e2e && npm run test:e2e && npm run linkcheck",
     "test:edge": "cd supabase/functions && deno check --config deno.json diagnostic-lead/index.ts && deno test --config deno.json --allow-env --allow-net diagnostic-lead/"
   },

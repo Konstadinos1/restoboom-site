@@ -1,6 +1,6 @@
 /**
  * 5×7 dot-matrix lettering for the RestoBoom wordmark (HUD logo and the glowing
- * 3D sign on the bistro), the step numbers and the FAQ question mark.
+ * 3D sign on the bistro), the step numbers, the FAQ question mark and the 404.
  * Original glyphs; only the characters we render.
  */
 export const GLYPH_COLS = 5;
@@ -20,6 +20,9 @@ const GLYPHS: Record<string, readonly string[]> = {
   "1": ["00100", "01100", "00100", "00100", "00100", "00100", "01110"],
   "2": ["01110", "10001", "00001", "00010", "00100", "01000", "11111"],
   "3": ["11110", "00001", "00001", "01110", "00001", "00001", "11110"],
+  // A slashed zero, so "404" can't be read as "4O4".
+  "0": ["01110", "10001", "10011", "10101", "11001", "10001", "01110"],
+  "4": ["00010", "00110", "01010", "10010", "11111", "00010", "00010"],
   " ": ["00000", "00000", "00000", "00000", "00000", "00000", "00000"],
 };
 
