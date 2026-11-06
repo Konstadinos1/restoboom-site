@@ -1,19 +1,16 @@
 import localFont from "next/font/local";
 
-/** Self-hosted variable fonts (SIL OFL 1.1): no third-party font requests, preloaded, size-adjusted fallback. */
-export const displayFont = localFont({
-  src: "../app/fonts/bricolage-grotesque-latin-wght.woff2",
-  variable: "--font-display",
-  weight: "200 800",
-  // "optional": the preloaded font is used if it arrives within ~100 ms, otherwise the
-  // size-adjusted fallback stays for this page view. No late swap → no repaint → better LCP/CLS.
+/**
+ * IBM Plex Mono (SIL OFL 1.1) is the single typeface, igloo-style. Self-hosted:
+ * no third-party font requests. "optional" avoids a late swap that would
+ * repaint the hero text and delay LCP.
+ */
+export const plexMono = localFont({
+  src: [
+    { path: "../app/fonts/ibm-plex-mono-latin-400.woff2", weight: "400", style: "normal" },
+    { path: "../app/fonts/ibm-plex-mono-latin-500.woff2", weight: "500", style: "normal" },
+    { path: "../app/fonts/ibm-plex-mono-latin-600.woff2", weight: "600", style: "normal" },
+  ],
+  variable: "--font-plex",
   display: "optional",
-});
-
-export const monoFont = localFont({
-  src: "../app/fonts/jetbrains-mono-latin-wght.woff2",
-  variable: "--font-code",
-  weight: "100 800",
-  display: "swap",
-  preload: false,
 });

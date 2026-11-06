@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { displayFont, monoFont } from "@/lib/fonts";
+import { plexMono } from "@/lib/fonts";
 import { experimentBootScript } from "@/lib/experiments";
 import type { Locale } from "@/lib/i18n";
 import { organizationJsonLd } from "@/lib/seo";
@@ -8,6 +8,7 @@ import SiteFooter from "./SiteFooter";
 import RevealController from "./RevealController";
 import AnalyticsRuntime from "./AnalyticsRuntime";
 import ConsentBanner from "./ConsentBanner";
+import CursorHalo from "./CursorHalo";
 import JsonLd from "./JsonLd";
 
 /** Reveal-on-scroll safety net: only hide [data-reveal] if JS can bring it back. */
@@ -19,7 +20,7 @@ const REVEAL_BOOT = `(function(){try{if(!("IntersectionObserver"in window))retur
  */
 export default function SiteShell({ locale, children }: { locale: Locale; children: ReactNode }) {
   return (
-    <html lang={locale === "fr" ? "fr-CA" : "en-CA"} className={`${displayFont.variable} ${monoFont.variable}`} suppressHydrationWarning>
+    <html lang={locale === "fr" ? "fr-CA" : "en-CA"} className={plexMono.variable} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: experimentBootScript() + REVEAL_BOOT }} />
         <JsonLd data={organizationJsonLd(locale)} />
@@ -31,6 +32,7 @@ export default function SiteShell({ locale, children }: { locale: Locale; childr
         <ConsentBanner locale={locale} />
         <RevealController />
         <AnalyticsRuntime />
+        <CursorHalo locale={locale} />
       </body>
     </html>
   );

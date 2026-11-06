@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { pageMetadata } from "@/lib/seo";
+import LegalDocument, { type LegalSection } from "@/components/LegalDocument";
 
 export const metadata: Metadata = pageMetadata({
   locale: "en",
@@ -9,7 +10,7 @@ export const metadata: Metadata = pageMetadata({
     "How RestoBoom collects, uses and protects your data. Law 25.",
 });
 
-const SECTIONS: { h: string; body: string }[] = [
+const SECTIONS: LegalSection[] = [
   { h: "1. Who we are", body: "RestoBoom is operated by [PLACEHOLDER — legal entity], in Québec, Canada." },
   {
     h: "2. Data we collect",
@@ -47,23 +48,5 @@ const SECTIONS: { h: string; body: string }[] = [
 ];
 
 export default function EnPrivacyPage() {
-  return (
-    <section className="wrap max-w-3xl pb-20 pt-32 md:pb-28 md:pt-40" aria-labelledby="privacy-h1">
-      <p className="kicker">Privacy</p>
-      <h1 id="privacy-h1" className="display-lg mt-4">
-        Your data stays your data.
-      </h1>
-      <p className="glass mt-6 p-4 text-sm text-muted">
-        [TO BE REVIEWED BY A LAWYER BEFORE LAUNCH — plain-language draft.]
-      </p>
-      <div className="mt-12 space-y-10">
-        {SECTIONS.map((s) => (
-          <div key={s.h}>
-            <h2 className="text-xl font-bold">{s.h}</h2>
-            <p className="mt-2 text-muted">{s.body}</p>
-          </div>
-        ))}
-      </div>
-    </section>
-  );
+  return <LegalDocument kicker="Privacy" title="Your data stays your data." titleId="privacy-h1" draftNote="[TO BE REVIEWED BY A LAWYER BEFORE LAUNCH — plain-language draft.]" sections={SECTIONS} />;
 }

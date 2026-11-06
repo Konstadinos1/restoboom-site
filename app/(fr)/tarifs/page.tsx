@@ -3,6 +3,7 @@ import Faq, { type FaqItem } from "@/components/Faq";
 import PricingTable from "@/components/PricingTable";
 import type { Metadata } from "next";
 import { pageMetadata } from "@/lib/seo";
+import PageBackdrop from "@/components/PageBackdrop";
 
 export const metadata: Metadata = pageMetadata({
   locale: "fr",
@@ -42,33 +43,36 @@ const FAQ_ITEMS: FaqItem[] = [
 
 export default function TarifsPage() {
   return (
-    <section className="wrap pb-20 pt-32 md:pb-28 md:pt-40" aria-labelledby="tarifs-h1">
-      <p className="kicker">Tarifs</p>
-      <h1 id="tarifs-h1" className="display-lg mt-4">
-        Trois tarifs. En dollars canadiens.
-      </h1>
-      <p className="lede mt-6 max-w-2xl">
-        Le prix du plan suit vos adresses, pas vos fonctionnalités. Toutes les fonctions — réception,
-        avis, relances, habitués — sont incluses partout.
-      </p>
-      <div className="mt-12">
-        <PricingTable locale="fr" variant="full" headingLevel="h2" />
-      </div>
+    <>
+      <PageBackdrop still="pricing" />
+      <section className="page-body wrap pb-20 pt-32 md:pb-28 md:pt-40" aria-labelledby="tarifs-h1">
+        <p className="kicker">Tarifs</p>
+        <h1 id="tarifs-h1" className="display-lg mt-4 max-w-3xl">
+          Trois tarifs. En dollars canadiens.
+        </h1>
+        <p className="lede mt-6 max-w-2xl">
+          Le prix du plan suit vos adresses, pas vos fonctionnalités. Toutes les fonctions — réception,
+          avis, relances, habitués — sont incluses partout.
+        </p>
+        <div className="mt-12">
+          <PricingTable locale="fr" variant="full" headingLevel="h2" />
+        </div>
 
-      <h2 className="display-lg mt-28">Les questions qu&apos;on nous pose sur les tarifs.</h2>
-      <div className="mt-10">
-        <Faq items={FAQ_ITEMS} />
-      </div>
+        <h2 className="display-lg mt-28">Les questions qu&apos;on nous pose sur les tarifs.</h2>
+        <div className="mt-10">
+          <Faq items={FAQ_ITEMS} />
+        </div>
 
-      <div className="glass ticks mt-20 p-8 md:p-12">
-        <h2 className="text-2xl font-bold">Pas sûr ? Parlez à un humain.</h2>
-        <Link
-          href="/diagnostic"
-          className="btn btn-primary mt-6" data-track="cta_click" data-track-label="pricing_bottom"
-        >
-          Diagnostic gratuit
-        </Link>
-      </div>
-    </section>
+        <div className="glass ticks mt-20 p-8 md:p-12">
+          <h2 className="display-md">Pas sûr ? Parlez à un humain.</h2>
+          <Link
+            href="/diagnostic/"
+            className="btn btn-primary mt-6" data-track="cta_click" data-track-label="pricing_bottom"
+          >
+            Diagnostic gratuit
+          </Link>
+        </div>
+      </section>
+    </>
   );
 }

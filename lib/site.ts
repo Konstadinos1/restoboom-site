@@ -3,9 +3,15 @@
  * absolute URL (canonical, sitemap, JSON-LD, OG) must go through here so the
  * GitHub Pages basePath and a future custom domain only change in one place.
  */
+import { isNoIndexBuild, PRODUCTION_BASE_PATH, resolveBasePath } from "./basePath.mjs";
+
 export const SITE_ORIGIN = "https://konstadinos1.github.io";
-export const BASE_PATH = "/restoboom-site";
-export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || `${SITE_ORIGIN}${BASE_PATH}`).replace(/\/$/, "");
+/** Where this build is served (a pull-request preview builds under a deeper path). */
+export const BASE_PATH = resolveBasePath(process.env.NEXT_PUBLIC_BASE_PATH);
+/** Canonical, sitemap, JSON-LD and OG URLs always name production, so previews never compete with it. */
+export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || `${SITE_ORIGIN}${PRODUCTION_BASE_PATH}`).replace(/\/$/, "");
+/** Pull-request previews: every page gets robots noindex. */
+export const NOINDEX = isNoIndexBuild(process.env.NEXT_PUBLIC_NOINDEX);
 export const CONTACT_EMAIL = process.env.NEXT_PUBLIC_CONTACT_EMAIL || "bonjour@restoboom.ca";
 export const BRAND_NAME = "RestoBoom";
 

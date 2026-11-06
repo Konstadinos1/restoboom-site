@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { pageMetadata } from "@/lib/seo";
+import LegalDocument, { type LegalSection } from "@/components/LegalDocument";
 
 export const metadata: Metadata = pageMetadata({
   locale: "fr",
@@ -9,7 +10,7 @@ export const metadata: Metadata = pageMetadata({
     "Comment RestoBoom recueille, utilise et protège vos données. Loi 25.",
 });
 
-const SECTIONS: { h: string; body: React.ReactNode }[] = [
+const SECTIONS: LegalSection[] = [
   {
     h: "1. Qui nous sommes",
     body: "RestoBoom est exploitée par [PLACEHOLDER — entité légale], au Québec.",
@@ -53,23 +54,5 @@ const SECTIONS: { h: string; body: React.ReactNode }[] = [
 ];
 
 export default function ConfidentialitePage() {
-  return (
-    <section className="wrap max-w-3xl pb-20 pt-32 md:pb-28 md:pt-40" aria-labelledby="privacy-h1">
-      <p className="kicker">Confidentialité</p>
-      <h1 id="privacy-h1" className="display-lg mt-4">
-        Vos données restent vos données.
-      </h1>
-      <p className="glass mt-6 p-4 text-sm text-muted">
-        [FAIRE VALIDER PAR UN JURISTE AVANT LANCEMENT — ébauche en langage clair.]
-      </p>
-      <div className="mt-12 space-y-10">
-        {SECTIONS.map((s) => (
-          <div key={s.h}>
-            <h2 className="text-xl font-bold">{s.h}</h2>
-            <p className="mt-2 text-muted">{s.body}</p>
-          </div>
-        ))}
-      </div>
-    </section>
-  );
+  return <LegalDocument kicker="Confidentialité" title="Vos données restent vos données." titleId="privacy-h1" draftNote="[FAIRE VALIDER PAR UN JURISTE AVANT LANCEMENT — ébauche en langage clair.]" sections={SECTIONS} />;
 }

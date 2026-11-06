@@ -59,8 +59,8 @@ function TierCard({ tier, index, locale, Heading }: { tier: Tier; index: number;
       className={`glass ticks flex flex-col p-7 ${featured ? "border-accent/50 shadow-[0_0_80px_-30px_rgb(255_90_54_/_0.55)]" : ""}`}
     >
       <div className="flex items-center justify-between gap-3">
-        <Heading className="font-mono text-sm font-bold uppercase tracking-[0.2em] text-frost">{tier.name}</Heading>
-        {featured && <span className="rounded-full bg-accent/15 px-3 py-1 font-mono text-[0.65rem] uppercase tracking-widest text-ember">{t.popular}</span>}
+        <Heading className="font-mono text-sm font-semibold uppercase tracking-[0.2em] text-frost">{tier.name}</Heading>
+        {featured && <span className="hud-label hud-label--accent">{t.popular}</span>}
       </div>
       <p className="mt-6 flex items-baseline gap-1">
         <span className="text-5xl font-semibold tracking-tight">{formatCad(tier.monthlyCad, locale)}</span>

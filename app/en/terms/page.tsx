@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { pageMetadata } from "@/lib/seo";
+import LegalDocument, { type LegalSection } from "@/components/LegalDocument";
 
 export const metadata: Metadata = pageMetadata({
   locale: "en",
@@ -9,7 +10,7 @@ export const metadata: Metadata = pageMetadata({
     "Terms of use for the RestoBoom site and service.",
 });
 
-const SECTIONS: { h: string; body: string }[] = [
+const SECTIONS: LegalSection[] = [
   {
     h: "1. Purpose",
     body: "These terms govern the use of the restoboom.ca website [PLACEHOLDER — domain to confirm] and the RestoBoom service: a growth platform for restaurants (front desk, reviews, follow-ups, regulars).",
@@ -53,23 +54,5 @@ const SECTIONS: { h: string; body: string }[] = [
 ];
 
 export default function EnTermsPage() {
-  return (
-    <section className="wrap max-w-3xl pb-20 pt-32 md:pb-28 md:pt-40" aria-labelledby="terms-h1">
-      <p className="kicker">Terms</p>
-      <h1 id="terms-h1" className="display-lg mt-4">
-        Terms of use.
-      </h1>
-      <p className="glass mt-6 p-4 text-sm text-muted">
-        [TO BE REVIEWED BY A LAWYER BEFORE LAUNCH — plain-language draft.]
-      </p>
-      <div className="mt-12 space-y-10">
-        {SECTIONS.map((s) => (
-          <div key={s.h}>
-            <h2 className="text-xl font-bold">{s.h}</h2>
-            <p className="mt-2 text-muted">{s.body}</p>
-          </div>
-        ))}
-      </div>
-    </section>
-  );
+  return <LegalDocument kicker="Terms" title="Terms of use." titleId="terms-h1" draftNote="[TO BE REVIEWED BY A LAWYER BEFORE LAUNCH — plain-language draft.]" sections={SECTIONS} />;
 }

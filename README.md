@@ -3,9 +3,10 @@
 Next.js 15 (App Router, static export) + Tailwind v4, deployed to GitHub Pages.
 French at `/`, English mirror at `/en/`. Live: https://konstadinos1.github.io/restoboom-site/
 
-Design language: **"Glace & braise"** — an igloo.inc-inspired cold, glassy, HUD-like UI
-(bracketed mono labels, frosted panels, scroll-revealed sections, a lazy WebGL hero) with
-RestoBoom's ember accent. All artwork and code are original.
+Design language: **"Glace & braise"** — an igloo.inc-inspired, scroll-driven 3D world: a bistro
+built from ice blocks with a warm orange glow inside, a foggy snowfield, HUD chrome in IBM Plex Mono
+(pixel wordmark, inverted labels, Montréal clock, progress bars). All artwork and code are original
+and procedural (no downloaded models, textures or sounds).
 
 Copy deck: `docs/copy-deck.md` (FR master, EN mirror, **claim register** — every factual claim
 must map to a source; no stats, no testimonials).
@@ -21,7 +22,11 @@ must map to a source; no stats, no testimonials).
 | `/conditions/` | `/en/terms/` |
 
 Plus generated `sitemap.xml` (hreflang fr-CA/en-CA/x-default), `robots.txt`, `manifest.webmanifest`,
-`llms.txt` (AI-search summary), OG cards (`public/og-*.png`, regenerate with `npm run images`) and a branded `404.html`.
+`llms.txt` (AI-search summary), OG cards (`public/og-*.png`, regenerate with `npm run images`) and a branded
+`404.html` (static, served by GitHub Pages for any missing URL; regenerate with `npm run not-found`).
+
+The other pages carry a rendered still of the 3D world behind their title (`components/PageBackdrop.tsx`):
+the pricing pillars, the bistro, the vault. The live 3D only runs on the home page.
 
 ## Scripts
 
@@ -30,11 +35,14 @@ Plus generated `sitemap.xml` (hreflang fr-CA/en-CA/x-default), `robots.txt`, `ma
 | `npm run dev` | Dev server |
 | `npm run build` | Static export to `out/` (+ custom 404) |
 | `npm run serve` | Serve `out/` under `/restoboom-site/` with gzip, like Pages |
-| `npm test` / `npm run test:coverage` | Vitest unit tests (lib/: validation, i18n, A/B, analytics, SEO) |
+| `npm test` / `npm run test:coverage` | Vitest unit tests (lib/: validation, i18n, A/B, analytics, SEO, 3D world logic) |
 | `npm run build:e2e && npm run test:e2e` | Playwright E2E on desktop + mobile: flows, lead form, consent, axe a11y |
 | `npm run test:edge` | Supabase Edge Function: `deno check` + tests against a local fake of Supabase's REST API (needs Deno 2) |
 | `npm run lighthouse` | Lighthouse CI with budgets (perf ≥ 90, a11y 100, BP ≥ 95, SEO ≥ 95, LCP ≤ 2.5 s, CLS ≤ 0.05) |
+| `npm run lighthouse:world` | Same pages with the 3D world forced on (`?3d=on`): FCP ≤ 2 s, LCP ≤ 2.5 s, CLS ≤ 0.05, a11y 100 |
 | `npm run linkcheck` | Crawl the built site, fail on any broken internal link |
+| `npm run stills` | Render the 3D world stills into `public/world/` from the built site (run `npm run build` first) |
+| `npm run images` / `npm run not-found` | Rebuild the OG cards and icons / the static 404 page from the stills and the dot-matrix glyphs |
 | `npm run check` | Typecheck, unit, E2E, link check |
 | `node scripts/capture-evidence.mjs` | After `build:e2e`: screenshots of every screen/state (desktop + mobile) and MP4 videos of the main flows into `evidence/` (git-ignored) |
 
@@ -46,15 +54,53 @@ Plus generated `sitemap.xml` (hreflang fr-CA/en-CA/x-default), `robots.txt`, `ma
 - **Deploy** (`deploy.yml`, push to `main`): re-runs typecheck + unit tests, builds with repo *Variables*,
   publishes `out/` to `gh-pages`. **Merging to `main` therefore updates the live site.**
   `scripts/deploy-pages.sh` still works for a manual deploy.
+- **PR previews** (`preview.yml`, every pull request from this repo): builds the PR under its own path and
+  publishes it to `https://konstadinos1.github.io/restoboom-site/preview/pr-<number>/` (the PR shows a
+  "View deployment" button). Previews are `noindex` with canonical URLs on production, and are removed when the
+  PR closes. A deploy from `main` republishes gh-pages from scratch, so open PRs get their preview back on their
+  next push.
 - **Production health** (`site-health.yml`, Mondays): every sitemap URL must return 200, and Lighthouse
   budgets are checked against the live site.
 - **Dependabot**: weekly npm (grouped minor/patch), monthly Actions.
 
-## Hero 3D
+## 3D world
 
-`lib/scene/emberCrystal.ts` (three.js, dynamic import after idle — never on the critical path).
-Runs only with WebGL2, viewport ≥ 768 px, ≥ 4 CPU cores, no `prefers-reduced-motion`, no Save-Data
-(`lib/scene/capability.ts`); otherwise a CSS "ember in ice" gradient is shown. Pauses off-screen and in hidden tabs.
+`lib/world/` (pure, unit-tested logic: tiers, scroll director, brick layout and motion, dot-matrix sign)
+and `lib/world/three/` (three.js scene, loaded with a dynamic import after idle, never on the critical
+path). The home page's sections are camera "stations": scroll drives the camera, the bistro coming
+apart, fog and the prismatic dives between stations. The HUD reads the active station from
+`<html data-active-station>` and CSS variables, so React never re-renders per frame.
+
+Each section between the hero and the closer has its own scene in `lib/world/three/stations/`, all
+procedural (outlines in `lib/world/stationShapes.ts`): a clock frozen in ice ringing out at 12 h 15,
+an ice slab cracking along one glowing crack per pain point, four ice cubes with the platform modules
+frozen inside, numbered stepping stones, a vault with a maple-leaf door, chat bubbles, pricing pillars
+topped with 1, 3 and 7 tiny bistros, and a dot-matrix question mark. Each scene animates with its
+section's scroll progress; only the current station and its neighbours are drawn.
+
+The platform cubes can be explored (`lib/world/explore.ts`, `lib/world/three/explorer.ts`): pointing at
+a cube (or its module card) lights it; clicking opens its lid, turns it to the camera and shows a HUD
+readout linking down to the module's card. Escape, a second click or the close button shuts it. The
+cards remain the accessible content.
+
+**Sound** (`lib/sound/`): a "Son / Sound" switch in the HUD, off at every page load. Everything is
+synthesized with Web Audio (no files): a winter wind and a low hum that swell as the camera dives
+between sections, a glass chime per section (a D major pentatonic climbing down the page) and faint
+ticks on links and buttons. It pauses in background tabs.
+
+**Cursor** (`components/CursorHalo.tsx`): four corner ticks trail the mouse (the system pointer stays
+visible), open up over links and say "Explorer" / "Fermer" over the cubes. Mouse and trackpad only,
+never with reduced motion.
+
+Tiers (`lib/world/tiers.ts`): **high** (refractive ice, shadows, MSAA) on 8+ core desktops, **medium**
+on other desktops, **low** on phones and 4-core / 4 GB devices, **static** (a rendered still of the
+same scene, all content intact) for `prefers-reduced-motion`, Save-Data, no WebGL2, and WebGL that
+would run in software (`failIfMajorPerformanceCaveat`: no usable GPU). `?3d=on` forces the world on software WebGL
+for QA, E2E tests and captures; it never overrides reduced motion or Save-Data.
+
+Lighthouse machines have no GPU, so `npm run lighthouse` scores the still fallback those visitors get;
+`npm run lighthouse:world` checks that the 3D never delays first paint or shifts layout. Frame-rate
+and main-thread cost of the 3D can only be judged on real devices with a GPU.
 
 ## Lead capture → Supabase
 

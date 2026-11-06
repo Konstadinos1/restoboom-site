@@ -1,19 +1,18 @@
 import Link from "next/link";
-import type { CSSProperties } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import type { Locale } from "@/lib/i18n";
 import { HOME, PRICE_TIERS } from "@/lib/content";
 import { faqJsonLd, softwareJsonLd } from "@/lib/seo";
+import type { StationId } from "@/lib/world/stations";
 import Faq from "./Faq";
-import HeroScene from "./HeroScene";
 import JsonLd from "./JsonLd";
 import PricingTable from "./PricingTable";
+import WorldCanvas from "./world/WorldCanvas";
+import HudBottom from "./world/HudBottom";
+import ExploreReadout from "./world/ExploreReadout";
 
 const delay = (ms: number) => ({ "--reveal-delay": ms }) as CSSProperties;
-const STAGGER_MS = 90;
 const HERO_STAGGER_MS = 70;
-/** Timeline steps appear in sequence, fast enough that the panel never reads as empty mid-scroll. */
-const TIMELINE_START_MS = 120;
-const TIMELINE_STEP_MS = 220;
 /** Hero entrance is CSS-only and transform-only: never invisible, so it can't delay LCP. */
 const heroIn = (step: number) => ({ animationDelay: `${step * HERO_STAGGER_MS}ms` }) as CSSProperties;
 
@@ -22,37 +21,41 @@ const ROUTES = {
   en: { diagnostic: "/en/diagnostic/", pricing: "/en/pricing/" },
 } as const;
 
-function PhoneIcon() {
-  return (
-    <svg className="phone-ring mr-2 inline-block size-5 align-[-2px] text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2Z" />
-    </svg>
-  );
-}
+type StationProps = {
+  id: StationId;
+  labelledBy: string;
+  children: ReactNode;
+  anchor?: string;
+  side?: "left" | "right";
+  sticky?: boolean;
+  height?: string;
+  /** Extra class on the inner wrapper, for a station that lays out differently (the hero on phones). */
+  innerClassName?: string;
+};
 
-function SectionHead({ kicker, h, p, id, compact = false }: { kicker: string; h: string; p?: string; id: string; compact?: boolean }) {
+/** A home section the 3D camera travels through; its HUD panel stays put (sticky) while the camera moves. */
+function Station({ id, labelledBy, children, anchor, side = "left", sticky = true, height, innerClassName = "" }: StationProps) {
+  const style = height ? ({ "--station-h": height } as CSSProperties) : undefined;
+  const inner = ["wrap", "station-inner", `station-inner--${side}`, sticky ? "station-inner--sticky" : "", innerClassName].filter(Boolean).join(" ");
   return (
-    <div className="max-w-3xl">
-      <p className="kicker" data-reveal>{kicker}</p>
-      <h2 id={id} className={`${compact ? "display-md md:text-5xl" : "display-lg"} mt-5`} data-reveal style={delay(80)}>{h}</h2>
-      {p && <p className="lede mt-6" data-reveal style={delay(160)}>{p}</p>}
-    </div>
+    <section id={anchor} data-station={id} aria-labelledby={labelledBy} className="station scroll-mt-0" style={style}>
+      <div className={inner}>{children}</div>
+    </section>
   );
 }
 
 function Hero({ locale }: { locale: Locale }) {
   const t = HOME[locale].hero;
   return (
-    <section className="relative isolate flex min-h-[100svh] items-end overflow-hidden pb-16 pt-28 md:items-center md:pb-0" aria-labelledby="hero-h1">
-      <HeroScene />
-      <div className="wrap relative w-full">
+    <Station id="hero" labelledBy="hero-h1" height="210svh" innerClassName="station-inner--hero">
+      <div className="station-fade hero-copy self-end pb-24 md:pb-20" style={{ width: "min(100%, 42rem)" }}>
         <p className="kicker hero-in" style={heroIn(0)}>{t.kicker}</p>
-        <h1 id="hero-h1" className="display-xl hero-in mt-6 max-w-[14ch]" style={heroIn(1)}>
+        <h1 id="hero-h1" className="display-xl hero-in mt-5" style={heroIn(1)}>
           <span data-ab-variant="a">{t.h1A}</span>
           <span data-ab-variant="b">{t.h1B}</span>
         </h1>
-        <p className="lede hero-in mt-8 max-w-xl" style={heroIn(2)}>{t.sub}</p>
-        <div className="hero-in mt-10 flex flex-wrap gap-4" style={heroIn(3)}>
+        <p className="lede hero-in mt-6 max-w-lg" style={heroIn(2)}>{t.sub}</p>
+        <div className="hero-in mt-8 flex flex-wrap gap-3" style={heroIn(3)}>
           <Link href={ROUTES[locale].diagnostic} className="btn btn-primary" data-track="cta_click" data-track-label="hero_primary">
             {t.ctaPrimary} <span className="arrow" aria-hidden="true">→</span>
           </Link>
@@ -60,209 +63,202 @@ function Hero({ locale }: { locale: Locale }) {
             {t.ctaSecondary}
           </Link>
         </div>
-        <ul className="hero-in mt-14 flex flex-wrap gap-x-8 gap-y-3 font-mono text-[0.7rem] uppercase tracking-[0.18em] text-frost" style={heroIn(4)}>
+        <ul className="hero-in mt-7 flex flex-wrap gap-1.5" style={heroIn(4)}>
           {t.proof.map((item) => (
-            <li key={item} className="flex items-center gap-2">
-              <span aria-hidden="true" className="text-accent">◆</span>
-              {item}
-            </li>
+            <li key={item} className="hud-label hud-label--light">{item}</li>
           ))}
         </ul>
       </div>
-      <div className="pointer-events-none absolute bottom-8 right-6 hidden items-center gap-3 md:flex md:right-10" aria-hidden="true">
-        <span className="font-mono text-[0.65rem] uppercase tracking-[0.3em] text-muted">{t.scroll}</span>
-        <span className="scroll-cue relative block h-10 w-px overflow-hidden bg-line" />
-      </div>
-    </section>
+    </Station>
   );
 }
 
 function Scene({ locale }: { locale: Locale }) {
   const t = HOME[locale].scene;
   return (
-    <section className="section border-t border-line" aria-labelledby="scene-h2">
-      <div className="wrap grid items-center gap-14 md:grid-cols-2">
-        <div>
-          <p className="kicker" data-reveal>{t.kicker}</p>
-          <h2 id="scene-h2" className="mt-5 text-[clamp(4.5rem,13vw,10rem)] font-semibold leading-[0.9] tracking-[-0.06em] tabular-nums" data-reveal style={delay(80)}>
-            {t.h}
-          </h2>
-          <p className="lede mt-8 max-w-md" data-reveal style={delay(160)}>{t.p}</p>
-          <p className="mt-6 max-w-md text-lg font-semibold text-ember" data-reveal style={delay(240)}>{t.resolve}</p>
-        </div>
-        <div className="glass ticks relative p-6 md:p-8" data-reveal>
-          <ol>
-          {t.timeline.map((step, i) => (
-            <li key={step.t} className="relative flex gap-5 pb-8 last:pb-0" data-reveal style={delay(TIMELINE_START_MS + i * TIMELINE_STEP_MS)}>
-              {i < t.timeline.length - 1 && <span className="absolute left-[7px] top-5 h-full w-px bg-gradient-to-b from-accent/70 to-line" aria-hidden="true" />}
-              <span className={`timeline-dot relative mt-1.5 size-[15px] shrink-0 rounded-full ${i === 0 ? "bg-frost/60" : "bg-accent"}`} aria-hidden="true" />
-              <div>
-                <p className="font-mono text-xs tracking-widest text-muted">{step.t}</p>
-                <p className="mt-1 text-xl font-semibold">
-                  {i === 0 && <PhoneIcon />}
-                  {step.label}
-                </p>
-                <p className="mt-1 text-muted">{step.detail}</p>
-              </div>
+    <Station id="scene" labelledBy="scene-h2">
+      <div className="station-panel station-fade glass ticks p-6 md:p-8" data-reveal>
+        <p className="kicker">{t.kicker}</p>
+        <h2 id="scene-h2" className="mt-4 text-[clamp(3.2rem,9vw,6.4rem)] font-medium leading-none tracking-[-0.08em] text-slate tabular-nums">{t.h}</h2>
+        <p className="lede mt-5">{t.p}</p>
+        <p className="mt-4 font-medium text-ember">{t.resolve}</p>
+        <ol className="mt-6 space-y-3 border-t border-line pt-5">
+          {t.timeline.map((step) => (
+            <li key={step.t} className="grid grid-cols-[auto_1fr] items-baseline gap-x-3 gap-y-0.5">
+              <span className="hud-label tabular-nums">{step.t}</span>
+              <span className="font-medium text-slate">{step.label}</span>
+              <span className="col-start-2 text-sm text-muted">{step.detail}</span>
             </li>
           ))}
-          </ol>
-          <p className="mt-6 border-t border-line pt-4 font-mono text-[0.68rem] uppercase tracking-[0.18em] text-muted">{t.note}</p>
-        </div>
+        </ol>
+        <p className="mt-5 text-[0.66rem] uppercase tracking-[0.14em] text-muted">{t.note}</p>
       </div>
-    </section>
+    </Station>
   );
 }
 
 function Pains({ locale }: { locale: Locale }) {
   const t = HOME[locale].pains;
   return (
-    <section className="section border-t border-line" aria-labelledby="pain-h2">
-      <div className="wrap">
-        <SectionHead kicker={t.kicker} h={t.h} id="pain-h2" />
-        <div className="mt-16 grid gap-px overflow-hidden rounded-2xl border border-line bg-line sm:grid-cols-2">
+    <Station id="pains" labelledBy="pain-h2" side="right">
+      <div className="station-panel station-fade glass ticks p-6 md:p-8" data-reveal>
+        <p className="kicker">{t.kicker}</p>
+        <h2 id="pain-h2" className="display-lg mt-4">{t.h}</h2>
+        <ol className="mt-6 divide-y divide-line border-y border-line">
           {t.items.map((pain, i) => (
-            // The cell keeps its opaque background; only its content fades in. Fading the cell itself
-            // exposed the 1px-gap divider colour as a grey slab while cards were revealing.
-            <div key={pain.h} className="bg-bg p-8 md:p-10">
-              <div data-reveal style={delay(i * STAGGER_MS)}>
-                <p className="font-mono text-xs text-accent" aria-hidden="true">0{i + 1}</p>
-                <h3 className="display-md mt-4">{pain.h}</h3>
-                <p className="mt-3 text-muted">{pain.p}</p>
+            <li key={pain.h} className="grid grid-cols-[auto_1fr] gap-x-4 py-4">
+              <span className="hud-label hud-label--accent mt-0.5 h-fit">{`0${i + 1}`}</span>
+              <div>
+                <h3 className="font-medium text-slate">{pain.h}</h3>
+                <p className="mt-1 text-sm text-muted">{pain.p}</p>
               </div>
-            </div>
+            </li>
           ))}
-        </div>
+        </ol>
       </div>
-    </section>
+    </Station>
   );
 }
 
 function Platform({ locale }: { locale: Locale }) {
   const t = HOME[locale].platform;
   return (
-    <section id="plateforme" className="section scroll-mt-16 border-t border-line" aria-labelledby="platform-h2">
-      <div className="wrap">
-        <SectionHead kicker={t.kicker} h={t.h} p={t.p} id="platform-h2" />
-        <div className="mt-16 space-y-5">
-          {t.modules.map((m) => (
-            <article key={m.id} id={m.id} className="glass ticks grid gap-8 p-7 md:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] md:p-12" data-reveal aria-labelledby={`mod-${m.id}`}>
-              <div>
-                <p className="flex items-center gap-4 font-mono text-xs uppercase tracking-[0.2em] text-frost">
-                  <span className="text-3xl font-semibold tracking-tight text-accent">{m.num}</span>
-                  {m.tag}
-                </p>
-                <h3 id={`mod-${m.id}`} className="display-md mt-6">{m.h}</h3>
-              </div>
-              <div>
-                <p className="text-muted md:text-lg">{m.p}</p>
-                <ul className="mt-6 flex flex-wrap gap-2">
-                  {m.specs.map((spec) => (
-                    <li key={spec} className="rounded-full border border-line-strong bg-bg/40 px-3.5 py-1.5 font-mono text-xs text-frost">
-                      {spec}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </article>
-          ))}
-        </div>
+    <Station id="platform" anchor="plateforme" labelledBy="platform-h2" sticky={false} height="230svh">
+      <div className="station-panel glass ticks p-6 md:p-8" data-reveal>
+        <p className="kicker">{t.kicker}</p>
+        <h2 id="platform-h2" className="display-lg mt-4">{t.h}</h2>
+        <p className="lede mt-4">{t.p}</p>
       </div>
-    </section>
+      <div className="mt-[40svh] grid gap-4 md:grid-cols-2 md:gap-5">
+        {t.modules.map((m, i) => (
+          <article key={m.id} id={m.id} className="module-card glass ticks p-6 md:p-7" data-reveal data-explore-index={i} style={delay(i * 80)} aria-labelledby={`mod-${m.id}`}>
+            <p className="flex flex-wrap items-center gap-1.5">
+              <span className="hud-label">{`MODULE_${m.num}`}</span>
+              <span className="hud-label hud-label--light">{m.tag}</span>
+            </p>
+            <h3 id={`mod-${m.id}`} className="display-md mt-4">{m.h}</h3>
+            <p className="mt-3 text-sm text-muted">{m.p}</p>
+            <ul className="mt-4 flex flex-wrap gap-1.5">
+              {m.specs.map((spec) => (
+                <li key={spec} className="border border-line-strong bg-white/60 px-2 py-1 text-[0.7rem] text-frost">{spec}</li>
+              ))}
+            </ul>
+          </article>
+        ))}
+      </div>
+    </Station>
   );
 }
 
 function Steps({ locale }: { locale: Locale }) {
   const t = HOME[locale].steps;
   return (
-    <section className="section border-t border-line" aria-labelledby="how-h2">
-      <div className="wrap">
-        <SectionHead kicker={t.kicker} h={t.h} id="how-h2" />
-        <ol className="mt-16 grid gap-5 md:grid-cols-3">
+    <Station id="steps" labelledBy="how-h2" side="right">
+      <div className="station-panel station-fade glass ticks p-6 md:p-8" data-reveal>
+        <p className="kicker">{t.kicker}</p>
+        <h2 id="how-h2" className="display-lg mt-4">{t.h}</h2>
+        <ol className="mt-6 space-y-5">
           {t.items.map((step, i) => (
-            <li key={step.h} className="relative border-t border-line-strong pt-8" data-reveal style={delay(i * 140)}>
-              <span className="absolute -top-px left-0 h-px w-16 bg-accent" aria-hidden="true" />
-              <p className="font-mono text-xs tracking-widest text-accent">{locale === "fr" ? "ÉTAPE" : "STEP"} 0{i + 1}</p>
-              <h3 className="display-md mt-4">{step.h}</h3>
-              <p className="mt-3 text-muted">{step.p}</p>
+            <li key={step.h} className="border-l-2 border-accent pl-4">
+              <p className="text-[0.68rem] font-medium uppercase tracking-[0.14em] text-accent">{`${locale === "fr" ? "Étape" : "Step"} 0${i + 1}`}</p>
+              <h3 className="display-md mt-1">{step.h}</h3>
+              <p className="mt-1 text-sm text-muted">{step.p}</p>
             </li>
           ))}
         </ol>
       </div>
-    </section>
+    </Station>
   );
 }
 
 function Compliance({ locale }: { locale: Locale }) {
   const t = HOME[locale].compliance;
   return (
-    <section id="conformite" className="section scroll-mt-16 border-t border-line" aria-labelledby="compliance-h2">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(50%_60%_at_80%_30%,rgb(93_137_168_/_0.12),transparent_70%)]" aria-hidden="true" />
-      <div className="wrap relative">
-        <SectionHead kicker={t.kicker} h={t.h} p={t.p} id="compliance-h2" />
-        <div className="mt-14 grid gap-5 md:grid-cols-3">
-          {t.items.map((row, i) => (
-            <div key={row.t} className="glass ticks p-7" data-reveal style={delay(i * STAGGER_MS)}>
-              <p className="font-mono text-xs text-accent" aria-hidden="true">◆</p>
-              <p className="mt-4 text-xl font-semibold">{row.t}</p>
-              <p className="mt-2 text-muted">{row.d}</p>
-            </div>
+    <Station id="compliance" anchor="conformite" labelledBy="compliance-h2">
+      <div className="station-panel station-fade glass ticks p-6 md:p-8" data-reveal>
+        <p className="kicker">{t.kicker}</p>
+        <h2 id="compliance-h2" className="display-lg mt-4">{t.h}</h2>
+        <p className="lede mt-4">{t.p}</p>
+        <ul className="mt-6 grid gap-2">
+          {t.items.map((row) => (
+            <li key={row.t} className="flex flex-wrap items-baseline gap-x-3 border-t border-line pt-3">
+              <span className="hud-label">{row.t}</span>
+              <span className="text-sm text-muted">{row.d}</span>
+            </li>
           ))}
-        </div>
+        </ul>
       </div>
-    </section>
+    </Station>
   );
 }
 
 function Samples({ locale }: { locale: Locale }) {
   const t = HOME[locale].samples;
   return (
-    <section className="section border-t border-line" aria-labelledby="samples-h2">
-      <div className="wrap">
-        <SectionHead kicker={t.kicker} h={t.h} id="samples-h2" />
-        <div className="mt-16 grid gap-5 md:grid-cols-3">
-          {t.items.map((s, i) => (
-            <figure key={s.label} className="glass flex flex-col p-6" data-reveal style={delay(i * 120)}>
-              <figcaption className="flex items-center justify-between gap-3 font-mono text-[0.68rem] uppercase tracking-[0.16em] text-muted">
-                <span>{s.label}</span>
-                <span className="rounded-full border border-line-strong px-2 py-0.5 text-frost">{s.channel}</span>
-              </figcaption>
-              <blockquote className="bubble mt-5 bg-frost/10 p-4 text-ink/90">{s.body}</blockquote>
-            </figure>
-          ))}
-        </div>
-        <p className="mt-8 text-sm text-muted">{t.note}</p>
+    <Station id="samples" labelledBy="samples-h2" side="right" sticky={false} height="190svh">
+      <div className="station-panel glass ticks p-6 md:p-8" data-reveal>
+        <p className="kicker">{t.kicker}</p>
+        <h2 id="samples-h2" className="display-lg mt-4">{t.h}</h2>
       </div>
-    </section>
+      <div className="mt-[30svh] grid gap-4 md:grid-cols-3">
+        {t.items.map((s, i) => (
+          <figure key={s.label} className="glass flex flex-col p-5" data-reveal style={delay(i * 100)}>
+            <figcaption className="flex flex-wrap items-center justify-between gap-2 text-[0.66rem] uppercase tracking-[0.12em] text-muted">
+              <span>{s.label}</span>
+              <span className="hud-label">{s.channel}</span>
+            </figcaption>
+            <blockquote className="bubble mt-4 bg-white p-4 text-sm text-ink">{s.body}</blockquote>
+          </figure>
+        ))}
+      </div>
+      <p className="mt-6 text-sm text-muted">{t.note}</p>
+    </Station>
   );
 }
 
 function Pricing({ locale }: { locale: Locale }) {
   const t = HOME[locale].pricing;
   return (
-    <section className="section border-t border-line" aria-labelledby="pricing-h2">
-      <div className="wrap">
-        <SectionHead kicker={t.kicker} h={t.h} p={t.p} id="pricing-h2" />
-        <div className="mt-16">
-          <PricingTable locale={locale} variant="compact" />
-        </div>
-        <Link href={ROUTES[locale].pricing} className="mt-6 inline-flex items-center gap-2 font-semibold text-ember underline-offset-4 hover:underline">
-          {t.link} <span aria-hidden="true">→</span>
+    <Station id="pricing" labelledBy="pricing-h2" sticky={false} height="200svh">
+      <div className="station-panel glass ticks p-6 md:p-8" data-reveal>
+        <p className="kicker">{t.kicker}</p>
+        <h2 id="pricing-h2" className="display-lg mt-4">{t.h}</h2>
+        <p className="lede mt-4">{t.p}</p>
+      </div>
+      <div className="mt-[30svh]">
+        <PricingTable locale={locale} variant="compact" />
+        <Link href={ROUTES[locale].pricing} className="hud-label hud-label--light mt-5 inline-block px-3 py-2 text-[0.72rem] hover:bg-slate hover:text-white">
+          {t.link} →
         </Link>
       </div>
-    </section>
+    </Station>
+  );
+}
+
+function FaqStation({ locale }: { locale: Locale }) {
+  const c = HOME[locale].faq;
+  return (
+    <Station id="faq" labelledBy="faq-h2" side="right" sticky={false} height="180svh">
+      <div className="ml-auto max-w-3xl glass ticks p-6 md:p-8" data-reveal>
+        <p className="kicker">{c.kicker}</p>
+        <h2 id="faq-h2" className="display-lg mt-4">{c.h}</h2>
+        <div className="mt-6">
+          <Faq items={c.items} />
+        </div>
+      </div>
+    </Station>
   );
 }
 
 function Closer({ locale }: { locale: Locale }) {
   const t = HOME[locale].closer;
   return (
-    <section className="section relative overflow-hidden border-t border-line" aria-labelledby="closer-h2">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(40%_60%_at_50%_100%,rgb(255_90_54_/_0.22),transparent_70%)]" aria-hidden="true" />
-      <div className="wrap relative text-center">
-        <h2 id="closer-h2" className="display-lg mx-auto max-w-4xl" data-reveal>{t.h}</h2>
-        <p className="lede mx-auto mt-6 max-w-2xl" data-reveal style={delay(100)}>{t.p}</p>
-        <div className="mt-10 flex flex-wrap justify-center gap-4" data-reveal style={delay(180)}>
+    <Station id="closer" labelledBy="closer-h2" height="190svh">
+      {/* No exit fade: the last panel only ever leaves towards the footer, and its CTA must stay fully opaque. */}
+      <div className="self-end pb-28" style={{ width: "min(100%, 44rem)" }} data-reveal>
+        <h2 id="closer-h2" className="display-lg">{t.h}</h2>
+        <p className="lede mt-5 max-w-xl">{t.p}</p>
+        <div className="mt-8 flex flex-wrap gap-3">
           <Link href={ROUTES[locale].diagnostic} className="btn btn-primary" data-track="cta_click" data-track-label="closer_primary">
             {t.cta} <span className="arrow" aria-hidden="true">→</span>
           </Link>
@@ -271,7 +267,7 @@ function Closer({ locale }: { locale: Locale }) {
           </Link>
         </div>
       </div>
-    </section>
+    </Station>
   );
 }
 
@@ -280,21 +276,21 @@ export default function HomeView({ locale }: { locale: Locale }) {
   return (
     <>
       <JsonLd data={[softwareJsonLd(locale, c.meta.description, PRICE_TIERS), faqJsonLd(c.faq.items)]} />
-      <Hero locale={locale} />
-      <Scene locale={locale} />
-      <Pains locale={locale} />
-      <Platform locale={locale} />
-      <Steps locale={locale} />
-      <Compliance locale={locale} />
-      <Samples locale={locale} />
-      <Pricing locale={locale} />
-      <section className="section border-t border-line" aria-labelledby="faq-h2">
-        <div className="wrap grid gap-12 md:grid-cols-[5fr_7fr]">
-          <SectionHead kicker={c.faq.kicker} h={c.faq.h} id="faq-h2" compact />
-          <Faq items={c.faq.items} />
-        </div>
-      </section>
-      <Closer locale={locale} />
+      <WorldCanvas />
+      <div className="world-content">
+        <Hero locale={locale} />
+        <Scene locale={locale} />
+        <Pains locale={locale} />
+        <Platform locale={locale} />
+        <Steps locale={locale} />
+        <Compliance locale={locale} />
+        <Samples locale={locale} />
+        <Pricing locale={locale} />
+        <FaqStation locale={locale} />
+        <Closer locale={locale} />
+      </div>
+      <HudBottom locale={locale} />
+      <ExploreReadout locale={locale} modules={c.platform.modules} />
     </>
   );
 }

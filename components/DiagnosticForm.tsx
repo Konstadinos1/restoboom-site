@@ -16,7 +16,7 @@ export default function DiagnosticForm({ locale }: { locale: Locale }) {
     <div className="glass ticks p-6 md:p-10">
       <form onSubmit={onSubmit} noValidate aria-describedby="df-legend">
         {Object.keys(errors).length > 0 && (
-          <p className="mb-6 rounded-xl border border-accent/50 bg-accent/10 px-4 py-3 text-sm text-ember" role="alert">
+          <p className="mb-6 border-l-2 border-accent bg-white/75 px-4 py-3 text-sm text-ember" role="alert">
             {copy.errors.summary}
           </p>
         )}
