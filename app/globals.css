@@ -282,6 +282,60 @@ body::after {
   z-index: 1;
 }
 
+/* Secondary pages: a still of the world behind the page top, fading into the page, with a light veil
+   on the text side so body text keeps its contrast. Phones put the subject above the title. */
+.page-backdrop {
+  position: absolute;
+  inset: 0 0 auto;
+  height: clamp(28rem, 82svh, 56rem);
+  overflow: hidden;
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(180deg, #000 55%, transparent);
+  mask-image: linear-gradient(180deg, #000 55%, transparent);
+}
+
+.page-backdrop picture,
+.page-backdrop img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.page-backdrop img {
+  object-fit: cover;
+  object-position: var(--focus, 50% 50%);
+}
+
+.page-backdrop::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgb(228 233 239 / 0.94) 0%, rgb(228 233 239 / 0.8) 36%, rgb(228 233 239 / 0) 66%);
+}
+
+.page-body {
+  position: relative;
+  z-index: 1;
+}
+
+@media (max-width: 767px) {
+  .page-backdrop {
+    height: 62svh;
+  }
+
+  .page-backdrop img {
+    object-position: var(--phone-focus, 50% 50%);
+  }
+
+  .page-backdrop::after {
+    background: linear-gradient(180deg, rgb(228 233 239 / 0) 30%, rgb(228 233 239 / 0.9) 58%);
+  }
+
+  .page-body {
+    padding-top: 36svh;
+  }
+}
+
 /* Stations: each home section gives the camera room to travel. overflow: clip (not hidden) keeps
    sticky panels working while stopping decorative overhangs from causing sideways scroll. */
 .station {

@@ -81,7 +81,7 @@ export default function SiteFooter({ locale }: { locale: Locale }) {
     <footer className="relative z-[1] border-t border-line bg-panel-solid">
       <div className="wrap grid gap-12 py-16 md:grid-cols-[2fr_1fr_1fr_1fr]">
         <div>
-          <p className="font-mono text-sm font-bold tracking-[0.22em]">
+          <p className="font-mono text-sm font-semibold tracking-[0.22em]">
             RESTOBOOM<span className="text-accent">.</span>
           </p>
           <p className="mt-3 max-w-xs text-sm text-muted">{t.tagline}</p>

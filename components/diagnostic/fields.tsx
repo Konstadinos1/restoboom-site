@@ -3,7 +3,8 @@ import { LOCATION_BUCKETS } from "@/lib/lead";
 import type { FieldErrors, FieldName } from "./useLeadSubmission";
 import type { FormCopy } from "./copy";
 
-const INPUT_BASE = "mt-2 w-full rounded-xl border bg-bg/60 px-4 py-3 text-ink placeholder:text-muted/70 transition-colors focus:border-frost focus:outline-none";
+// Square HUD-style fields; focus keeps the site-wide accent outline (see :focus-visible in globals.css).
+const INPUT_BASE = "mt-2 w-full border bg-white/70 px-4 py-3 text-ink placeholder:text-muted/70 transition-colors focus:border-frost";
 
 /** id/name/aria wiring shared by every control, so errors are announced with their field. */
 export function controlProps(field: FieldName, errors: FieldErrors, hintId?: string) {
