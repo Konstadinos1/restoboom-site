@@ -27,6 +27,8 @@ const NOISE_SECONDS = 4;
 const NOISE_SEED = 2026;
 const SILENCE = 0.0001;
 const HUM_DETUNE_CENTS = [-4, 3, 6] as const;
+/** Only catches peaks (several chimes at once): the bed and single chimes pass untouched. */
+const COMPRESSOR = { threshold: -10, knee: 8, ratio: 6 } as const;
 const isLive = (ctx: BaseAudioContext): ctx is AudioContext => typeof AudioContext !== "undefined" && ctx instanceof AudioContext;
 
 type Wind = { gain: GainNode; filter: BiquadFilterNode; sources: AudioScheduledSourceNode[] };
@@ -103,7 +105,7 @@ function createFader(ctx: BaseAudioContext, master: GainNode): Pick<SoundEngine,
 
 export function createSoundEngine(ctx: BaseAudioContext): SoundEngine {
   const master = new GainNode(ctx, { gain: 0 });
-  master.connect(new DynamicsCompressorNode(ctx, { threshold: -18, ratio: 4 })).connect(ctx.destination);
+  master.connect(new DynamicsCompressorNode(ctx, { threshold: COMPRESSOR.threshold, knee: COMPRESSOR.knee, ratio: COMPRESSOR.ratio })).connect(ctx.destination);
   const wind = buildWind(ctx, master);
   const hum = buildHum(ctx, master);
   const echo = buildEcho(ctx, master);

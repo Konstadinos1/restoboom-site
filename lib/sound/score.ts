@@ -7,7 +7,7 @@
 import { clamp01, createRng } from "../world/random";
 
 /** Overall loudness once switched on, and how long switching on or off takes (seconds). */
-export const MASTER_LEVEL = 0.55;
+export const MASTER_LEVEL = 0.8;
 export const FADE_SECONDS = 0.6;
 /** How quickly the wind and hum follow the camera (setTargetAtTime time constant, seconds). */
 export const MOTION_SMOOTHING = 0.25;
@@ -26,9 +26,9 @@ export function chimeFrequency(stationIndex: number): number {
 
 /** A struck glass: inharmonic partials (ratio to the note, loudness, ring time in seconds). */
 export const CHIME_PARTIALS = [
-  { ratio: 1, level: 0.11, decay: 2.6 },
-  { ratio: 2.76, level: 0.04, decay: 1.3 },
-  { ratio: 5.4, level: 0.015, decay: 0.6 },
+  { ratio: 1, level: 0.18, decay: 2.6 },
+  { ratio: 2.76, level: 0.066, decay: 1.3 },
+  { ratio: 5.4, level: 0.024, decay: 0.6 },
 ] as const;
 export const CHIME_ATTACK = 0.008;
 /** A short echo, as if the chime rang inside the ice. */
@@ -36,7 +36,7 @@ export const ECHO = { delay: 0.31, feedback: 0.28, cutoff: 2800 } as const;
 
 /** Wind: filtered pink noise. Louder and brighter while the camera dives through the fog. */
 export function windLevel(motion: number): number {
-  return 0.05 + 0.17 * clamp01(motion);
+  return 0.25 + 0.5 * clamp01(motion);
 }
 
 export function windCutoff(motion: number): number {
@@ -51,13 +51,13 @@ export const HUM_NOTES_HZ = [73.42, 110, 146.83] as const;
 export const HUM_CUTOFF = 420;
 
 export function humLevel(motion: number): number {
-  return 0.028 + 0.02 * clamp01(motion);
+  return 0.03 + 0.03 * clamp01(motion);
 }
 
 /** Button ticks: a short high blip on hover, a lower one on press. */
 export const TICKS = {
-  hover: { frequency: 2600, level: 0.018, duration: 0.03 },
-  press: { frequency: 1400, level: 0.035, duration: 0.06 },
+  hover: { frequency: 2600, level: 0.04, duration: 0.03 },
+  press: { frequency: 1400, level: 0.055, duration: 0.06 },
 } as const;
 export type TickKind = keyof typeof TICKS;
 
