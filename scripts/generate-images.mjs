@@ -1,39 +1,43 @@
-// Renders brand PNGs (OG cards, app icons) from HTML with the preinstalled Playwright.
-// Usage: node scripts/generate-images.mjs   (outputs into public/)
-import { chromium } from "playwright";
+// Renders brand PNGs (OG cards, app icons) from HTML with Playwright. The OG cards sit on the rendered
+// still of the 3D bistro (npm run stills) with the site's own dot-matrix wordmark.
+// Usage: node scripts/generate-images.mjs   (outputs into public/; needs Node 22.18+ for the .ts imports)
+import { chromium } from "@playwright/test";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
+import { dotsPath, layoutDots } from "../lib/world/dotMatrix.ts";
+import { STILLS } from "../lib/world/stills.ts";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const font = (f) => readFileSync(join(root, "app/fonts", f)).toString("base64");
 const favicon = readFileSync(join(root, "public/favicon.svg"), "utf8");
+const still = `data:image/webp;base64,${readFileSync(join(root, "public", STILLS.home.src)).toString("base64")}`;
 const plex = (weight) => `src:url(data:font/woff2;base64,${font(`ibm-plex-mono-latin-${weight}.woff2`)}) format("woff2");font-weight:${weight}`;
 const FONT_CSS = `
-@font-face{font-family:D;${plex(600)}}
 @font-face{font-family:M;${plex(400)}}
-@font-face{font-family:M;${plex(600)}}`;
+@font-face{font-family:M;${plex(500)}}`;
+
+const DOT = 2 / 3;
+const logo = layoutDots("RESTOBOOM.");
+const WORDMARK = `<svg class="logo" viewBox="0 0 ${logo.cols} ${logo.rows}" shape-rendering="crispEdges"><path d="${dotsPath(logo.dots.filter((d) => d.char !== "."), DOT, 0)}" fill="#2c3045"/><path d="${dotsPath(logo.dots.filter((d) => d.char === "."), DOT, 0)}" fill="#b5401b"/></svg>`;
 
 const OG = {
-  fr: { kicker: "POUR LES RESTAURANTS DU QUÉBEC", h: "Le resto qui répond à tout.", sub: "Appel manqué&nbsp;? Texto en 15 secondes.", meta: "HÉBERGÉ AU CANADA · LCAP + LOI 25 · CAD" },
-  en: { kicker: "FOR QUÉBEC RESTAURANTS", h: "The restaurant that answers everything.", sub: "Missed call? Texted back in 15 seconds.", meta: "HOSTED IN CANADA · CASL + LAW 25 · CAD" },
+  fr: { kicker: "Pour les restaurants du Québec", h: "Le resto qui répond à tout.", sub: "Appel manqué&nbsp;? Texto en 15&nbsp;secondes.", meta: "Hébergé au Canada · LCAP + Loi 25 · CAD" },
+  en: { kicker: "For Québec restaurants", h: "The restaurant that answers everything.", sub: "Missed call? Texted back in 15&nbsp;seconds.", meta: "Hosted in Canada · CASL + Law 25 · CAD" },
 };
 
 const ogHtml = (t) => `<!doctype html><html><head><style>${FONT_CSS}
-*{margin:0;box-sizing:border-box}body{width:1200px;height:630px;background:#06080b;color:#e9f0f5;font-family:D;position:relative;overflow:hidden}
-.glow{position:absolute;inset:0;background:radial-gradient(34% 52% at 80% 50%,rgba(255,90,54,.45),transparent 70%),radial-gradient(50% 70% at 80% 50%,rgba(93,137,168,.28),transparent 72%)}
-.gem{position:absolute;right:90px;top:120px;width:300px;height:390px;filter:drop-shadow(0 0 60px rgba(255,90,54,.6))}
-.c{position:absolute;left:80px;top:78px;right:420px}
-.k{font-family:M;font-size:19px;letter-spacing:.2em;color:#bcd3e3;display:flex;gap:14px;align-items:center}
-.k:before{content:"";width:12px;height:12px;border-radius:9px;background:#ff5a36;box-shadow:0 0 14px #ff5a36}
-h1{margin-top:44px;font-size:84px;line-height:.98;letter-spacing:-.045em;font-weight:650}
-p{margin-top:30px;font-size:34px;color:#ffb38a;font-weight:550}
-.m{position:absolute;left:80px;bottom:62px;font-family:M;font-size:18px;letter-spacing:.18em;color:#8d9aa6}
-.w{position:absolute;right:80px;bottom:58px;font-family:M;font-size:26px;font-weight:700;letter-spacing:.22em}.w b{color:#ff5a36}
-</style></head><body><div class="glow"></div>
-<svg class="gem" viewBox="14 9 36 46"><defs><radialGradient id="g" cx="50%" cy="55%" r="50%"><stop offset="0" stop-color="#ffb38a"/><stop offset=".55" stop-color="#ff5a36"/><stop offset="1" stop-color="#c73e1d"/></radialGradient></defs><path d="M32 9 50 25 32 55 14 25Z" fill="url(#g)"/><path d="M32 9 50 25H14Z" fill="#bcd3e3" fill-opacity=".55"/><path d="M32 9 39 25 32 55 25 25Z" fill="#fff" fill-opacity=".18"/></svg>
+*{margin:0;box-sizing:border-box}body{width:1200px;height:630px;background:#e4e9ef url(${still}) ${STILLS.home.focus}/cover no-repeat;color:#2c3045;font-family:M;position:relative;overflow:hidden}
+.veil{position:absolute;inset:0;background:linear-gradient(90deg,rgb(228 233 239/.96) 0%,rgb(228 233 239/.86) 40%,rgb(228 233 239/0) 66%)}
+.logo{position:absolute;left:72px;top:60px;height:30px;width:auto}
+.c{position:absolute;left:72px;top:150px;width:640px}
+.k{font-size:19px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:#39405a}.k:before{content:"////// ";color:#b5401b}
+h1{margin-top:26px;font-size:68px;line-height:1.02;letter-spacing:-.05em;font-weight:500}
+p{margin-top:26px;font-size:30px;font-weight:500;color:#a8391a}
+.m{position:absolute;left:72px;bottom:56px;padding:6px 10px;font-size:16px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;background:#2c3045;color:#fff}
+</style></head><body><div class="veil"></div>${WORDMARK}
 <div class="c"><div class="k">${t.kicker}</div><h1>${t.h}</h1><p>${t.sub}</p></div>
-<div class="m">${t.meta}</div><div class="w">RESTOBOOM<b>.</b></div></body></html>`;
+<div class="m">${t.meta}</div></body></html>`;
 
 const iconHtml = (size) => `<!doctype html><html><head><style>*{margin:0}body{width:${size}px;height:${size}px;background:#06080b}svg{width:100%;height:100%;display:block}</style></head><body>${favicon}</body></html>`;
 
