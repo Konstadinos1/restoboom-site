@@ -507,7 +507,8 @@ body::after {
   transition-delay: calc(var(--reveal-delay, 0) * 1ms), calc(var(--reveal-delay, 0) * 1ms), 0s, 0s;
 }
 
-html[data-cursor="explore"] body {
+html[data-cursor="explore"] body,
+html[data-cursor="close"] body {
   cursor: pointer;
 }
 
@@ -587,6 +588,85 @@ html[data-cursor="explore"] body {
 
 .sound-toggle[aria-pressed="true"] .sound-bars i:nth-child(3) {
   animation-delay: -0.6s;
+}
+
+/* HUD cursor: four corner ticks (like the panels') trailing the system pointer, which stays visible.
+   Mouse and trackpad only, never with reduced motion (CursorHalo doesn't render then). */
+.cursor-reticle {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 80;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+.cursor-reticle[data-mode="hidden"] {
+  opacity: 0;
+}
+
+.cursor-box {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 26px;
+  height: 26px;
+  transform: translate(-50%, -50%);
+  transition: width 0.35s var(--ease-out-expo), height 0.35s var(--ease-out-expo), transform 0.2s ease;
+}
+
+.cursor-box i {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  border: 0 solid var(--color-slate);
+  transition: border-color 0.25s ease;
+}
+
+.cursor-box i:nth-child(1) { left: 0; top: 0; border-top-width: 1.5px; border-left-width: 1.5px; }
+.cursor-box i:nth-child(2) { right: 0; top: 0; border-top-width: 1.5px; border-right-width: 1.5px; }
+.cursor-box i:nth-child(3) { left: 0; bottom: 0; border-bottom-width: 1.5px; border-left-width: 1.5px; }
+.cursor-box i:nth-child(4) { right: 0; bottom: 0; border-bottom-width: 1.5px; border-right-width: 1.5px; }
+
+.cursor-reticle[data-mode="link"] .cursor-box {
+  width: 40px;
+  height: 40px;
+}
+
+.cursor-reticle[data-mode="link"] .cursor-box i {
+  border-color: var(--color-accent);
+}
+
+.cursor-reticle[data-mode="explore"] .cursor-box,
+.cursor-reticle[data-mode="close"] .cursor-box {
+  width: 58px;
+  height: 58px;
+}
+
+.cursor-reticle[data-mode="explore"] .cursor-box i,
+.cursor-reticle[data-mode="close"] .cursor-box i {
+  border-color: var(--color-glow);
+}
+
+.cursor-reticle[data-pressed] .cursor-box {
+  transform: translate(-50%, -50%) scale(0.8);
+}
+
+.cursor-label {
+  position: absolute;
+  left: 34px;
+  top: 20px;
+  opacity: 0;
+  transform: translate3d(0, 4px, 0);
+  transition: opacity 0.2s ease, transform 0.3s var(--ease-out-expo);
+}
+
+.cursor-reticle[data-mode="explore"] .cursor-label--explore,
+.cursor-reticle[data-mode="close"] .cursor-label--close {
+  opacity: 1;
+  transform: none;
 }
 
 /* The still scene isn't being built: no build bar. */

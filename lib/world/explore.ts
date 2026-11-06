@@ -8,8 +8,9 @@
 export const EXPLORE_EVENT = "rb:explore";
 /** Fired on window by the page (the readout's close button) to close the open cube. */
 export const EXPLORE_CLOSE_EVENT = "rb:explore-close";
-/** <html data-cursor="explore"> while the pointer is over a cube: the cursor shows its label and a hand. */
+/** <html data-cursor> while the pointer is over a cube: "explore", or "close" over the open one (see lib/cursor.ts). */
 export const EXPLORE_CURSOR = "explore";
+export const CLOSE_CURSOR = "close";
 /** The module cards carry data-explore-index: hovering one lights its cube. */
 export const EXPLORE_INDEX_ATTRIBUTE = "data-explore-index";
 

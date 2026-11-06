@@ -8,6 +8,7 @@ import SiteFooter from "./SiteFooter";
 import RevealController from "./RevealController";
 import AnalyticsRuntime from "./AnalyticsRuntime";
 import ConsentBanner from "./ConsentBanner";
+import CursorHalo from "./CursorHalo";
 import JsonLd from "./JsonLd";
 
 /** Reveal-on-scroll safety net: only hide [data-reveal] if JS can bring it back. */
@@ -31,6 +32,7 @@ export default function SiteShell({ locale, children }: { locale: Locale; childr
         <ConsentBanner locale={locale} />
         <RevealController />
         <AnalyticsRuntime />
+        <CursorHalo locale={locale} />
       </body>
     </html>
   );

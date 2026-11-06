@@ -8,7 +8,7 @@
  */
 import { Raycaster, Vector2, type Object3D, type PerspectiveCamera } from "three";
 import {
-  EXPLORE_CLOSE_EVENT, EXPLORE_CURSOR, EXPLORE_EVENT, EXPLORE_IDLE, EXPLORE_INDEX_ATTRIBUTE, exploreReducer, toDeviceCoords, type ExploreAction,
+  CLOSE_CURSOR, EXPLORE_CLOSE_EVENT, EXPLORE_CURSOR, EXPLORE_EVENT, EXPLORE_IDLE, EXPLORE_INDEX_ATTRIBUTE, exploreReducer, toDeviceCoords, type ExploreAction,
   type ExploreState,
 } from "../explore";
 import type { Explorable } from "./stations/kit";
@@ -26,10 +26,10 @@ function describeTarget(target: EventTarget | null): { overContent: boolean; car
   return { overContent: Boolean(el?.closest(CONTENT)), cardIndex: Number.isInteger(index) ? index : null };
 }
 
-function setCursorHint(on: boolean): void {
+function setCursorHint(hint: typeof EXPLORE_CURSOR | typeof CLOSE_CURSOR | null): void {
   const root = document.documentElement;
-  if (on) root.dataset.cursor = EXPLORE_CURSOR;
-  else if (root.dataset.cursor === EXPLORE_CURSOR) delete root.dataset.cursor;
+  if (hint) root.dataset.cursor = hint;
+  else if (root.dataset.cursor === EXPLORE_CURSOR || root.dataset.cursor === CLOSE_CURSOR) delete root.dataset.cursor;
 }
 
 /** Which explorable item, if any, is at a screen position. */
@@ -95,8 +95,8 @@ export function createExplorer(camera: PerspectiveCamera, explorables: ReadonlyM
       active = here;
     }
     const cube = active && pointer && !pointer.overContent ? pick(active.targets, pointer.x, pointer.y) : null;
-    setCursorHint(cube !== null);
+    setCursorHint(cube === null ? null : cube === state.opened ? CLOSE_CURSOR : EXPLORE_CURSOR);
     if (active) dispatch({ type: "hover", index: cube ?? pointer?.cardIndex ?? null });
   };
-  return { update, dispose: () => (stop(), setCursorHint(false)) };
+  return { update, dispose: () => (stop(), setCursorHint(null)) };
 }
