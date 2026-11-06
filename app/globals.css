@@ -580,8 +580,10 @@ html[data-cursor="close"] body {
   to { height: 8px; }
 }
 
+/* On: the bars light up in the ember colour, so it reads differently from the (also dark) hover state. */
 .sound-toggle[aria-pressed="true"] .sound-bars i {
   opacity: 1;
+  background: var(--color-glow);
   animation: sound-bar 0.9s ease-in-out infinite alternate;
 }
 
