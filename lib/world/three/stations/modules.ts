@@ -116,7 +116,9 @@ function createCell(kit: StationKit, object: Mesh<BufferGeometry, MeshBasicMater
   holder.add(object, base.shell, base.lines, lid);
   const home = { x: (index % 2 === 0 ? -1 : 1) * (SPACING / 2), y: (index < 2 ? 1 : -1) * (SPACING / 2) };
   const cell = { holder, object, glow: object.material.color.clone(), lid, edges, home, phase: index * 1.7, hover: 0, open: 0 };
-  return { cell, targets: [base.shell, top.shell] };
+  // Once the lid is up the object rises out of the ice: it belongs to its cube for pointing and clicking too.
+  object.userData.exploreIndex = index;
+  return { cell, targets: [base.shell, top.shell, object] };
 }
 
 type Focus = { hovered: number | null; opened: number | null };
