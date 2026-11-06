@@ -61,12 +61,15 @@ function useReticle(ref: RefObject<HTMLDivElement | null>, allowed: boolean): vo
       over = describe(e.target);
       render();
     };
+    // A scroll can bring a link under a pointer that hasn't moved: the browser then only sends pointerover.
+    const onOver = (e: PointerEvent) => e.pointerType === "mouse" && over !== null && ((over = describe(e.target)), render());
     const onOut = (e: PointerEvent) => e.relatedTarget === null && ((over = null), render());
     const onDown = () => (el.dataset.pressed = "true");
     const onUp = () => delete el.dataset.pressed;
     const hints = new MutationObserver(render);
     hints.observe(document.documentElement, { attributes: true, attributeFilter: ["data-cursor"] });
     window.addEventListener("pointermove", onMove, { passive: true });
+    document.addEventListener("pointerover", onOver);
     document.addEventListener("pointerout", onOut);
     window.addEventListener("pointerdown", onDown);
     window.addEventListener("pointerup", onUp);
@@ -74,6 +77,7 @@ function useReticle(ref: RefObject<HTMLDivElement | null>, allowed: boolean): vo
       hints.disconnect();
       follower.stop();
       window.removeEventListener("pointermove", onMove);
+      document.removeEventListener("pointerover", onOver);
       document.removeEventListener("pointerout", onOut);
       window.removeEventListener("pointerdown", onDown);
       window.removeEventListener("pointerup", onUp);
