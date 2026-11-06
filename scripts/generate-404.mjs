@@ -2,7 +2,7 @@
 // (no Next.js) with absolute production paths. The dot-matrix wordmark and "404" come from the
 // site's own glyphs and the backdrop from the rendered stills, so they stay in step with the site
 // (tests/unit/not-found-page.test.ts checks that). `npm run build` copies it into out/.
-// Usage: npm run 404   (needs Node 22.18+, which runs the TypeScript modules it imports)
+// Usage: npm run not-found   (needs Node 22.18+, which runs the TypeScript modules it imports)
 import { writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";

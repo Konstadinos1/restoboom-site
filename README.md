@@ -23,7 +23,7 @@ must map to a source; no stats, no testimonials).
 
 Plus generated `sitemap.xml` (hreflang fr-CA/en-CA/x-default), `robots.txt`, `manifest.webmanifest`,
 `llms.txt` (AI-search summary), OG cards (`public/og-*.png`, regenerate with `npm run images`) and a branded
-`404.html` (static, served by GitHub Pages for any missing URL; regenerate with `npm run 404`).
+`404.html` (static, served by GitHub Pages for any missing URL; regenerate with `npm run not-found`).
 
 The other pages carry a rendered still of the 3D world behind their title (`components/PageBackdrop.tsx`):
 the pricing pillars, the bistro, the vault. The live 3D only runs on the home page.
@@ -42,7 +42,7 @@ the pricing pillars, the bistro, the vault. The live 3D only runs on the home pa
 | `npm run lighthouse:world` | Same pages with the 3D world forced on (`?3d=on`): FCP ≤ 2 s, LCP ≤ 2.5 s, CLS ≤ 0.05, a11y 100 |
 | `npm run linkcheck` | Crawl the built site, fail on any broken internal link |
 | `npm run stills` | Render the 3D world stills into `public/world/` from the built site (run `npm run build` first) |
-| `npm run images` / `npm run 404` | Rebuild the OG cards and icons / the static 404 page from the stills and the dot-matrix glyphs |
+| `npm run images` / `npm run not-found` | Rebuild the OG cards and icons / the static 404 page from the stills and the dot-matrix glyphs |
 | `npm run check` | Typecheck, unit, E2E, link check |
 | `node scripts/capture-evidence.mjs` | After `build:e2e`: screenshots of every screen/state (desktop + mobile) and MP4 videos of the main flows into `evidence/` (git-ignored) |
 
