@@ -7,6 +7,7 @@ import { homeAnchor, homeHref, langSwitchHref, type Locale } from "@/lib/i18n";
 import PixelLogo from "./world/PixelLogo";
 import StationLabel from "./world/StationLabel";
 import MontrealClock from "./world/MontrealClock";
+import SoundToggle from "./SoundToggle";
 
 const L = {
   fr: {
@@ -139,7 +140,10 @@ export default function SiteHeader({ locale }: { locale: Locale }) {
               {menu.open ? t.close : t.menu}
             </button>
           </div>
-          <MontrealClock />
+          <div className="flex items-center gap-1.5">
+            <SoundToggle locale={locale} />
+            <MontrealClock />
+          </div>
         </div>
       </div>
       {menu.open && <MobileNav t={t} onNavigate={menu.close} />}

@@ -4,8 +4,9 @@ import { useEffect, useRef, useState, type CSSProperties, type RefObject } from 
 import { whenIdle } from "@/lib/idle";
 import { assetPath } from "@/lib/site";
 import { HOME_PORTRAIT_STILL, STILLS } from "@/lib/world/stills";
-import { scrollCursor } from "@/lib/world/director";
-import { collectStations, publishBuild, publishProgress, publishStation, readStationProgress, resetStation } from "@/lib/world/publish";
+import { cameraAt, scrollCursor } from "@/lib/world/director";
+import { collectStations, publishBuild, publishMotion, publishProgress, publishStation, readStationProgress, resetStation } from "@/lib/world/publish";
+import { STATION_CAMERAS } from "@/lib/world/stations";
 import { readTierSignals } from "@/lib/world/signals";
 import { chooseTier, TIER_CONFIG, type Tier } from "@/lib/world/tiers";
 import type { WorldHandle } from "@/lib/world/three/world";
@@ -27,6 +28,8 @@ function trackWithoutWorld(): () => void {
     const cursor = scrollCursor(readStationProgress(collectStations()));
     publishStation(Math.floor(cursor));
     publishProgress(cursor);
+    // No camera here, but the sound still follows where one would be diving.
+    publishMotion(cameraAt(cursor, STATION_CAMERAS).prism);
   };
   const onScroll = () => {
     if (!raf) raf = requestAnimationFrame(update);
@@ -53,6 +56,7 @@ async function startWorld(canvas: HTMLCanvasElement, tier: Exclude<Tier, "static
     onFrame: (f) => {
       publishStation(f.station);
       publishProgress(f.station + f.local);
+      publishMotion(f.prism);
     },
     onProgress: (p) => publishBuild(p, p >= 1 ? "ready" : "building"),
   });

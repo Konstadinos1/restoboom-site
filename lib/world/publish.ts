@@ -8,6 +8,7 @@ import { STATION_IDS, type StationId } from "./stations";
 
 export const STATION_EVENT = "rb:station";
 let current: StationId | null = null;
+let motion = 0;
 
 export function publishStation(index: number): void {
   const id = STATION_IDS[Math.min(STATION_IDS.length - 1, Math.max(0, index))];
@@ -20,6 +21,15 @@ export function publishStation(index: number): void {
 export function publishProgress(cursor: number): void {
   const overall = Math.min(1, Math.max(0, cursor / (STATION_IDS.length - 1)));
   document.documentElement.style.setProperty("--world-progress", overall.toFixed(4));
+}
+
+/** How hard the camera is diving between sections right now (0..1): the sound swells with it. */
+export function publishMotion(value: number): void {
+  motion = Math.min(1, Math.max(0, value));
+}
+
+export function readMotion(): number {
+  return motion;
 }
 
 export function publishBuild(fraction: number, state: "building" | "ready" | "static"): void {
@@ -43,6 +53,7 @@ export function readStationProgress(stations: readonly HTMLElement[]): number[] 
 /** Leaving the home page: forget the station so other pages show their own label. */
 export function resetStation(): void {
   current = null;
+  motion = 0;
   delete document.documentElement.dataset.activeStation;
   document.documentElement.style.removeProperty("--world-progress");
 }

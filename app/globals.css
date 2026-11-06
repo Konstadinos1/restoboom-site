@@ -533,6 +533,62 @@ html[data-cursor="explore"] body {
   }
 }
 
+/* Sound switch: three bars that sit flat when off and stand (and dance, motion allowing) when on. */
+.sound-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  cursor: pointer;
+  transition: background-color 0.25s, color 0.25s;
+}
+
+.sound-toggle:hover,
+.sound-toggle[aria-pressed="true"] {
+  background: var(--color-slate);
+  color: #fff;
+}
+
+.sound-bars {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 1.5px;
+  height: 8px;
+}
+
+/* Off: a still equaliser, dimmed (flat dots would read as "…"). */
+.sound-bars i {
+  width: 2px;
+  height: 4px;
+  background: currentColor;
+  opacity: 0.5;
+}
+
+.sound-bars i:nth-child(2) {
+  height: 7px;
+}
+
+.sound-bars i:nth-child(3) {
+  height: 5px;
+}
+
+@keyframes sound-bar {
+  from { height: 2px; }
+  to { height: 8px; }
+}
+
+.sound-toggle[aria-pressed="true"] .sound-bars i {
+  opacity: 1;
+  animation: sound-bar 0.9s ease-in-out infinite alternate;
+}
+
+.sound-toggle[aria-pressed="true"] .sound-bars i:nth-child(2) {
+  animation-delay: -0.3s;
+}
+
+.sound-toggle[aria-pressed="true"] .sound-bars i:nth-child(3) {
+  animation-delay: -0.6s;
+}
+
 /* The still scene isn't being built: no build bar. */
 [data-world="static"] .world-build {
   display: none;
