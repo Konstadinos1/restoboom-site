@@ -518,12 +518,15 @@ html[data-cursor="close"] body {
   to { opacity: 1; transform: none; }
 }
 
+/* Opaque, unlike the other panels: on phones it lands on top of page text, which must not show through. */
 .explore-readout {
   position: fixed;
   right: 2.5rem;
   bottom: 6.5rem;
   z-index: 35;
   width: min(23rem, calc(100vw - 2rem));
+  background: var(--color-panel-solid);
+  box-shadow: 0 24px 60px -24px rgb(31 34 50 / 0.55);
   animation: readout-in 0.5s var(--ease-out-expo) both;
 }
 
