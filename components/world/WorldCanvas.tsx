@@ -1,7 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState, type RefObject } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type RefObject } from "react";
 import { whenIdle } from "@/lib/idle";
+import { assetPath } from "@/lib/site";
+import { HOME_PORTRAIT_STILL, STILLS } from "@/lib/world/stills";
 import { scrollCursor } from "@/lib/world/director";
 import { collectStations, publishBuild, publishProgress, publishStation, readStationProgress, resetStation } from "@/lib/world/publish";
 import { readTierSignals } from "@/lib/world/signals";
@@ -9,6 +11,11 @@ import { chooseTier, TIER_CONFIG, type Tier } from "@/lib/world/tiers";
 import type { WorldHandle } from "@/lib/world/three/world";
 
 type LenisLike = { raf: (time: number) => void; destroy: () => void };
+/** The stills the static tier shows (CSS only fetches them when it applies them). */
+const STILL_VARS = {
+  "--still-landscape": `url(${assetPath(STILLS.home.src)})`,
+  "--still-portrait": `url(${assetPath(HOME_PORTRAIT_STILL.src)})`,
+} as CSSProperties;
 type Mounted = { handle: WorldHandle; lenis: LenisLike | null };
 const LENIS_LERP = 0.09;
 
@@ -115,13 +122,14 @@ function useWorld(canvasRef: RefObject<HTMLCanvasElement | null>): { tier: Tier 
   return { tier, ready };
 }
 
-/** The fixed full-screen 3D world behind the home page. Content never waits for it. */
+/** The fixed full-screen 3D world behind the home page (or its rendered still). Content never waits for it. */
 export default function WorldCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { tier, ready } = useWorld(canvasRef);
   return (
-    <div className="world" aria-hidden="true" data-testid="world" data-tier={tier} data-ready={ready ? "true" : "false"}>
+    <div className="world" aria-hidden="true" data-testid="world" data-tier={tier} data-ready={ready ? "true" : "false"} style={STILL_VARS}>
       <div className="world-fallback" />
+      <div className="world-still" data-testid="world-still" />
       <canvas ref={canvasRef} className="world-canvas" data-testid="world-canvas" style={{ opacity: ready ? 1 : 0 }} />
     </div>
   );

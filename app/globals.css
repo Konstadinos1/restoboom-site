@@ -257,6 +257,26 @@ body::after {
     linear-gradient(180deg, #e9eef4 0%, #c9d0da 55%, #dfe5ec 100%);
 }
 
+/* No live 3D (reduced motion, Save-Data, no GPU): a rendered still of the same scene. The image is
+   only fetched once the tier is known to be static, so visitors who get the 3D never download it. */
+.world-still {
+  position: absolute;
+  inset: 0;
+  background-position: 80% 50%;
+  background-size: cover;
+}
+
+.world[data-tier="static"] .world-still {
+  background-image: var(--still-landscape);
+}
+
+@media (max-aspect-ratio: 4/5) {
+  .world[data-tier="static"] .world-still {
+    background-image: var(--still-portrait);
+    background-position: 50% 30%;
+  }
+}
+
 .world-content {
   position: relative;
   z-index: 1;
