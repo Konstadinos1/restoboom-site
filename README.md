@@ -22,7 +22,11 @@ must map to a source; no stats, no testimonials).
 | `/conditions/` | `/en/terms/` |
 
 Plus generated `sitemap.xml` (hreflang fr-CA/en-CA/x-default), `robots.txt`, `manifest.webmanifest`,
-`llms.txt` (AI-search summary), OG cards (`public/og-*.png`, regenerate with `npm run images`) and a branded `404.html`.
+`llms.txt` (AI-search summary), OG cards (`public/og-*.png`, regenerate with `npm run images`) and a branded
+`404.html` (static, served by GitHub Pages for any missing URL; regenerate with `npm run 404`).
+
+The other pages carry a rendered still of the 3D world behind their title (`components/PageBackdrop.tsx`):
+the pricing pillars, the bistro, the vault. The live 3D only runs on the home page.
 
 ## Scripts
 
@@ -37,6 +41,8 @@ Plus generated `sitemap.xml` (hreflang fr-CA/en-CA/x-default), `robots.txt`, `ma
 | `npm run lighthouse` | Lighthouse CI with budgets (perf ≥ 90, a11y 100, BP ≥ 95, SEO ≥ 95, LCP ≤ 2.5 s, CLS ≤ 0.05) |
 | `npm run lighthouse:world` | Same pages with the 3D world forced on (`?3d=on`): FCP ≤ 2 s, LCP ≤ 2.5 s, CLS ≤ 0.05, a11y 100 |
 | `npm run linkcheck` | Crawl the built site, fail on any broken internal link |
+| `npm run stills` | Render the 3D world stills into `public/world/` from the built site (run `npm run build` first) |
+| `npm run images` / `npm run 404` | Rebuild the OG cards and icons / the static 404 page from the stills and the dot-matrix glyphs |
 | `npm run check` | Typecheck, unit, E2E, link check |
 | `node scripts/capture-evidence.mjs` | After `build:e2e`: screenshots of every screen/state (desktop + mobile) and MP4 videos of the main flows into `evidence/` (git-ignored) |
 
@@ -72,10 +78,24 @@ frozen inside, numbered stepping stones, a vault with a maple-leaf door, chat bu
 topped with 1, 3 and 7 tiny bistros, and a dot-matrix question mark. Each scene animates with its
 section's scroll progress; only the current station and its neighbours are drawn.
 
+The platform cubes can be explored (`lib/world/explore.ts`, `lib/world/three/explorer.ts`): pointing at
+a cube (or its module card) lights it; clicking opens its lid, turns it to the camera and shows a HUD
+readout linking down to the module's card. Escape, a second click or the close button shuts it. The
+cards remain the accessible content.
+
+**Sound** (`lib/sound/`): a "Son / Sound" switch in the HUD, off at every page load. Everything is
+synthesized with Web Audio (no files): a winter wind and a low hum that swell as the camera dives
+between sections, a glass chime per section (a D major pentatonic climbing down the page) and faint
+ticks on links and buttons. It pauses in background tabs.
+
+**Cursor** (`components/CursorHalo.tsx`): four corner ticks trail the mouse (the system pointer stays
+visible), open up over links and say "Explorer" / "Fermer" over the cubes. Mouse and trackpad only,
+never with reduced motion.
+
 Tiers (`lib/world/tiers.ts`): **high** (refractive ice, shadows, MSAA) on 8+ core desktops, **medium**
-on other desktops, **low** on phones and 4-core / 4 GB devices, **static** (a still fogged scene, all
-content intact) for `prefers-reduced-motion`, Save-Data, no WebGL2, and WebGL that would run in
-software (`failIfMajorPerformanceCaveat`: no usable GPU). `?3d=on` forces the world on software WebGL
+on other desktops, **low** on phones and 4-core / 4 GB devices, **static** (a rendered still of the
+same scene, all content intact) for `prefers-reduced-motion`, Save-Data, no WebGL2, and WebGL that
+would run in software (`failIfMajorPerformanceCaveat`: no usable GPU). `?3d=on` forces the world on software WebGL
 for QA, E2E tests and captures; it never overrides reduced motion or Save-Data.
 
 Lighthouse machines have no GPU, so `npm run lighthouse` scores the still fallback those visitors get;
